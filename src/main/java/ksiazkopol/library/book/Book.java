@@ -1,4 +1,4 @@
-package com.library.book;
+package ksiazkopol.library.book;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class Book {
     @Id
     @Column
-    private long EAN;
+    private Long id;
     @Column
     private String title;
     @Column
@@ -28,5 +28,7 @@ public class Book {
     @Column
     private String publisher;
     @Column
-    private LocalDate dateOfPublication;
+    private LocalDate publicationDate;
+    @Column
+    private Long ISBN;
 }

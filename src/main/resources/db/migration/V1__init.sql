@@ -1,10 +1,11 @@
 CREATE TABLE books(
-    ean BIGINT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     author VARCHAR(255),
     title VARCHAR(255),
     date_of_publication DATE,
     genre VARCHAR(255),
-    publisher VARCHAR(255)
+    publisher VARCHAR(255),
+    isbn BIGINT
 );
 
 CREATE TABLE readers(

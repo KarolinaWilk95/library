@@ -1,4 +1,4 @@
-package com.library.reader;
+package ksiazkopol.library.reader;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ public class Reader {
     @Id
     @GeneratedValue
     @Column
-    private long id;
+    private Long id;
     @Column
     private String name;
     @Column
