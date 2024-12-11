@@ -1,9 +1,7 @@
 package ksiazkopol.library.book;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import ksiazkopol.library.reader.Reader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Book {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Long id;
     @Column
@@ -31,4 +30,11 @@ public class Book {
     private LocalDate publicationDate;
     @Column
     private Long ISBN;
+    @Column
+    private LocalDate borrowDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Reader reader;
+
+
 }

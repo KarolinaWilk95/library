@@ -1,5 +1,7 @@
 package ksiazkopol.library.reader;
 
+import ksiazkopol.library.book.Book;
+import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookRepository;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import ksiazkopol.library.dao.ReaderSearchRequestRepository;
@@ -9,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ReaderService {
@@ -28,6 +31,7 @@ public class ReaderService {
         return readerRepository.save(reader);
     }
 
+    @Transactional
     public List<Reader> findAllReaders() {
         return readerRepository.findAll();
     }
@@ -73,7 +77,15 @@ public class ReaderService {
 
     //return the book
 
-    //show all borrowed books
 
+    public Set<Book> findAllBorrowedBooks(Long id){
+        Optional<Reader> reader = readerRepository.findById(id);
+        if (reader.isPresent()) {
+            return reader.get().getBooks();
+        } else {
+            throw new ReaderNotFound("Selected reader not found");
+        }
+
+    }
 
 }

@@ -1,15 +1,17 @@
 CREATE TABLE books(
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     author VARCHAR(255),
     title VARCHAR(255),
-    date_of_publication DATE,
+    publication_date DATE,
     genre VARCHAR(255),
     publisher VARCHAR(255),
-    isbn BIGINT
+    isbn BIGINT,
+    borrow_date DATE,
+    reader_id BIGINT
 );
 
 CREATE TABLE readers(
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255),
     surname VARCHAR(255)
 );

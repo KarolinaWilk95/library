@@ -1,7 +1,7 @@
 DELETE FROM books;
 DELETE FROM readers;
 
-INSERT INTO books (ISBN, author, title, date_of_publication, genre, publisher)
+INSERT INTO books (ISBN, author, title, publication_date, genre, publisher)
 VALUES
   (9780345538922, 'J.R.R. Tolkien', 'The Lord of the Rings', '1954-07-29', 'Fantasy', 'George Allen & Unwin'),
   (9780451524935, 'George Orwell', '1984', '1949-06-08', 'Dystopian', 'Secker & Warburg'),

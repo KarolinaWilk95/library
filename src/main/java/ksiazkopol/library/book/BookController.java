@@ -20,28 +20,33 @@ public class BookController {
     }
 
     @PostMapping("api/books")
-    public Book addBook(@RequestBody Book book) {
-        return bookService.addBook(book);
+    public BookAPI addBook(@RequestBody BookAPI book) {
+        Book result = bookService.addBook(book.toModel());
+        return new BookAPI(result);
     }
 
     @GetMapping("api/books")
-    public List<Book> showBooks() {
-        return bookService.showAllBooks();
+    public List<BookAPI> showBooks() {
+        List<Book> result = bookService.showAllBooks();
+
+        return result.stream()
+                .map((BookAPI::new))
+                .toList();
     }
 
     @GetMapping("/api/books/{id}")
-    public ResponseEntity<Book> findByID(@PathVariable Long id) {
+    public ResponseEntity<BookAPI> findByID(@PathVariable Long id) {
         Optional<Book> book = bookService.findBookByID(id);
 
         if (book.isPresent()) {
-            return ResponseEntity.ok(book.get());
+            return ResponseEntity.ok(new BookAPI(book.get()));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/api/books/{id}")
-    public ResponseEntity<Book> deleteByID(@PathVariable Long id) {
+    public ResponseEntity<BookAPI> deleteByID(@PathVariable Long id) {
         try {
             bookService.deleteById(id);
             return ResponseEntity.ok().build();
@@ -51,7 +56,7 @@ public class BookController {
     }
 
     @PutMapping("/api/books/{id}")
-    public ResponseEntity<Book> updateByID(@PathVariable Long id, @RequestBody
+    public ResponseEntity<BookAPI> updateByID(@PathVariable Long id, @RequestBody
     Book book) {
         try {
             bookService.updateByID(id, book);
@@ -62,13 +67,13 @@ public class BookController {
     }
 
     @GetMapping("/api/books/search")
-    public List<Book> search(@RequestParam(name = "author", required = false) String author,
-                             @RequestParam(name = "title", required = false) String title,
-                             @RequestParam(name = "genre", required = false) String genre,
-                             @RequestParam(name = "publisher", required = false) String publisher,
-                             @RequestParam(name = "date", required = false) LocalDate publicationDate,
-                             @RequestParam(name = "year", required = false) Integer yearOfPublication,
-                             @RequestParam(name = "ISBN", required = false) Long ISBN) {
+    public List<BookAPI> search(@RequestParam(name = "author", required = false) String author,
+                                @RequestParam(name = "title", required = false) String title,
+                                @RequestParam(name = "genre", required = false) String genre,
+                                @RequestParam(name = "publisher", required = false) String publisher,
+                                @RequestParam(name = "date", required = false) LocalDate publicationDate,
+                                @RequestParam(name = "year", required = false) Integer yearOfPublication,
+                                @RequestParam(name = "ISBN", required = false) Long ISBN) {
         BookSearchRequest bookSearchRequest = new BookSearchRequest();
         bookSearchRequest.setAuthor(author);
         bookSearchRequest.setTitle(title);
@@ -78,6 +83,10 @@ public class BookController {
         bookSearchRequest.setPublicationYear(yearOfPublication);
         bookSearchRequest.setISBN(ISBN);
 
-        return bookService.search(bookSearchRequest);
+        List<Book> result = bookService.search(bookSearchRequest);
+
+        return result.stream()
+                .map(BookAPI::new)
+                .toList();
     }
 }
