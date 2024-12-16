@@ -2,23 +2,25 @@ package ksiazkopol.library.reader;
 
 import ksiazkopol.library.book.Book;
 import ksiazkopol.library.book.BookAPI;
+import ksiazkopol.library.book.BookService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
-import ksiazkopol.library.exception.ReaderNotFound;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
 public class ReaderController {
 
     final private ReaderService readerService;
+    final private BookService bookService;
 
-    public ReaderController(ReaderService readerService) {
+    public ReaderController(ReaderService readerService, BookService bookService) {
         this.readerService = readerService;
+        this.bookService = bookService;
     }
 
     @PostMapping("api/readers")
@@ -36,7 +38,6 @@ public class ReaderController {
     @GetMapping("/api/readers/{id}")
     public ResponseEntity<ReaderAPI> findByID(@PathVariable Long id) {
         Optional<Reader> reader = readerService.getReaderByID(id);
-
         if (reader.isPresent()) {
             return ResponseEntity.ok(new ReaderAPI(reader.get()));
         } else {
@@ -46,24 +47,15 @@ public class ReaderController {
 
     @DeleteMapping("/api/readers/{id}")
     public ResponseEntity<ReaderAPI> deleteByID(@PathVariable Long id) {
-        try {
-            readerService.deleteByID(id);
-            return ResponseEntity.ok().build();
-        } catch (ReaderNotFound e) {
-            return ResponseEntity.notFound().build();
-        }
+        readerService.deleteByID(id);
+        return ResponseEntity.ok().build();
     }
 
 
     @PutMapping("/api/readers/{id}")
-    public ResponseEntity<ReaderAPI> updateByID(@PathVariable Long id, @RequestBody
-    Reader reader) {
-        try {
-            readerService.updateByID(id, reader);
-            return ResponseEntity.ok().build();
-        } catch (ReaderNotFound e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ReaderAPI> updateByID(@PathVariable Long id, @RequestBody Reader reader) {
+        readerService.updateByID(id, reader);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/readers/search")
@@ -80,10 +72,24 @@ public class ReaderController {
                 .toList();
     }
 
-    @GetMapping("api/readers/{id}/list")
-    public Set<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
-        Set<Book> result = readerService.findAllBorrowedBooks(id);
-        return result.stream().map(BookAPI::new).collect(Collectors.toSet());
+    @GetMapping("api/readers/{id}/borrowed-books")
+    public List<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
+        Collection<Book> result = readerService.findAllBorrowedBooks(id);
+        return result.stream().map(BookAPI::new).collect(Collectors.toList());
+    }
+
+    @PutMapping("api/readers/{readerId}/books/{id}")
+    public ResponseEntity<BookAPI> borrowBook(@PathVariable Long id,
+                                              @PathVariable Long readerId) {
+        bookService.borrowBook(id, readerId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("api/readers/{readerId}/books/{id}")
+    public ResponseEntity<BookAPI> returnBook(@PathVariable Long id,
+                                              @PathVariable Long readerId) {
+        bookService.returnBook(id, readerId);
+        return ResponseEntity.ok().build();
     }
 }
 

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,6 +24,7 @@ public class BookAPI {
 
     private LocalDate publicationDate;
     private Long ISBN;
+    private LocalDate borrowDate;
 
     public BookAPI(Book book) {
         this.id = book.getId();
@@ -31,6 +34,7 @@ public class BookAPI {
         this.genre = book.getGenre();
         this.author = book.getAuthor();
         this.title = book.getTitle();
+        this.borrowDate = book.getBorrowDate();
     }
 
     public Book toModel() {
@@ -42,6 +46,14 @@ public class BookAPI {
         model.setPublisher(publisher);
         model.setPublicationDate(publicationDate);
         model.setISBN(ISBN);
+        model.setBorrowDate(borrowDate);
         return model;
+    }
+
+    public static List<BookAPI> toApi(Collection<Book> modelBooks) {
+        return modelBooks.stream()
+                .map((BookAPI::new))
+                .toList();
+
     }
 }

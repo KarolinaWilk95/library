@@ -34,6 +34,7 @@ public class Book {
     private LocalDate borrowDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "readerId")
     private Reader reader;
 
 

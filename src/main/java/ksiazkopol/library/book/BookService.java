@@ -1,11 +1,14 @@
 package ksiazkopol.library.book;
 
-import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.dao.BookSearchRequest;
-import ksiazkopol.library.exception.BookNotFound;
+import ksiazkopol.library.dao.BookSearchRequestRepository;
+import ksiazkopol.library.reader.ReaderNotFoundException;
+import ksiazkopol.library.reader.Reader;
+import ksiazkopol.library.reader.ReaderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,11 +16,13 @@ import java.util.Optional;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final ReaderRepository readerRepository;
     private final BookSearchRequestRepository bookSearchRequestRepository;
 
 
-    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository) {
+    public BookService(BookRepository bookRepository, ReaderRepository readerRepository, BookSearchRequestRepository bookSearchRequestRepository) {
         this.bookRepository = bookRepository;
+        this.readerRepository = readerRepository;
         this.bookSearchRequestRepository = bookSearchRequestRepository;
     }
 
@@ -35,7 +40,7 @@ public class BookService {
         if (bookInRepository.isPresent()) {
             return bookRepository.findById(id);
         } else {
-            throw new BookNotFound("Selected book not found");
+            throw new BookNotFoundException("Selected book not found");
         }
     }
 
@@ -45,7 +50,7 @@ public class BookService {
         if (book.isPresent()) {
             bookRepository.delete(book.get());
         } else {
-            throw new BookNotFound("Selected book not found");
+            throw new BookNotFoundException("Selected book not found");
         }
     }
 
@@ -62,11 +67,47 @@ public class BookService {
             book.setPublicationDate(newBook.getPublicationDate());
             book.setISBN(newBook.getISBN());
         } else {
-            throw new BookNotFound("Selected book not found");
+            throw new BookNotFoundException("Selected book not found");
         }
     }
 
     public List<Book> search(BookSearchRequest bookSearchRequest) {
         return bookSearchRequestRepository.findByCriteria(bookSearchRequest);
+    }
+
+    @Transactional
+    public void borrowBook(Long id, Long readerId) {
+        //Optional <Book>
+        Optional<Book> bookInRepository = bookRepository.findById(id);
+        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
+        LocalDate currentDate = LocalDate.now();
+
+        if (readerInRepository.isEmpty()) {
+            throw new ReaderNotFoundException("Selected reader not found");
+        } else if (bookInRepository.isEmpty()) {
+            throw new BookNotFoundException("Selected book not found");
+        } else if (bookInRepository.get().getBorrowDate() != null) {
+            throw new BorrowedBookException("Selected book is already borrowed");
+        } else {
+            Book book = bookInRepository.get();
+            book.setReader(readerInRepository.get());
+            book.setBorrowDate(currentDate);
+        }
+    }
+
+    @Transactional
+    public void returnBook(Long id, Long readerId) {
+        Optional<Book> bookInRepository = bookRepository.findById(id);
+        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
+
+        if (!readerInRepository.isPresent()) {
+            throw new ReaderNotFoundException("Selected reader not found");
+        } else if (!bookInRepository.isPresent()) {
+            throw new BookNotFoundException("Selected book not found");
+        } else {
+            Book book = bookInRepository.get();
+            book.setReader(null);
+            book.setBorrowDate(null);
+        }
     }
 }

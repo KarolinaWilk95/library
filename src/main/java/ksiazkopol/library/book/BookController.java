@@ -1,7 +1,6 @@
 package ksiazkopol.library.book;
 
 import ksiazkopol.library.dao.BookSearchRequest;
-import ksiazkopol.library.exception.BookNotFound;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +28,7 @@ public class BookController {
     public List<BookAPI> showBooks() {
         List<Book> result = bookService.showAllBooks();
 
-        return result.stream()
-                .map((BookAPI::new))
-                .toList();
+        return BookAPI.toApi(result);
     }
 
     @GetMapping("/api/books/{id}")
@@ -50,7 +47,7 @@ public class BookController {
         try {
             bookService.deleteById(id);
             return ResponseEntity.ok().build();
-        } catch (BookNotFound e) {
+        } catch (BookNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -61,7 +58,7 @@ public class BookController {
         try {
             bookService.updateByID(id, book);
             return ResponseEntity.ok().build();
-        } catch (BookNotFound e) {
+        } catch (BookNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -85,8 +82,6 @@ public class BookController {
 
         List<Book> result = bookService.search(bookSearchRequest);
 
-        return result.stream()
-                .map(BookAPI::new)
-                .toList();
+        return BookAPI.toApi(result);
     }
 }

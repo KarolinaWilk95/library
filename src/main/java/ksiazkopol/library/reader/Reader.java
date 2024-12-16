@@ -6,8 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 @Entity
 @Table(name = "readers")
@@ -24,6 +23,6 @@ public class Reader {
     @Column
     private String surname;
 
-    @OneToMany(mappedBy = "reader")
-    private Set<Book> books = new HashSet<>();
+    @OneToMany(mappedBy = "reader", fetch = FetchType.EAGER)
+    private Collection<Book> books;
 }

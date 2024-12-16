@@ -1,13 +1,12 @@
 package ksiazkopol.library.reader;
 
 
-import ksiazkopol.library.book.Book;
+import ksiazkopol.library.book.BookAPI;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,13 +15,13 @@ public class ReaderAPI {
     private Long id;
     private String name;
     private String surname;
-    private Set<Book> books = new HashSet<>();
+    private List<BookAPI> books;
 
     public ReaderAPI(Reader reader) {
         this.name = reader.getName();
         this.surname = reader.getSurname();
         this.id = reader.getId();
-        this.books = reader.getBooks();
+        books = BookAPI.toApi(reader.getBooks());
     }
 
     public Reader toModel() {
@@ -30,7 +29,7 @@ public class ReaderAPI {
         reader.setName(name);
         reader.setSurname(surname);
         reader.setId(id);
-        reader.setBooks(books);
+        reader.setBooks(null);
         return reader;
     }
 }

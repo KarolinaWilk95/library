@@ -1,17 +1,15 @@
 package ksiazkopol.library.reader;
 
 import ksiazkopol.library.book.Book;
-import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookRepository;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import ksiazkopol.library.dao.ReaderSearchRequestRepository;
-import ksiazkopol.library.exception.ReaderNotFound;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class ReaderService {
@@ -42,7 +40,7 @@ public class ReaderService {
         if (readerInRepository.isPresent()) {
             return readerRepository.findById(id);
         } else {
-            throw new ReaderNotFound("Selected reader not found");
+            throw new ReaderNotFoundException("Selected reader not found");
         }
     }
 
@@ -50,9 +48,14 @@ public class ReaderService {
     public void deleteByID(Long id) {
         Optional<Reader> reader = readerRepository.findById(id);
         if (reader.isPresent()) {
-            readerRepository.delete(reader.get());
+            Reader readerExisting = reader.get();
+            for (Book book : readerExisting.getBooks()) {
+                book.setReader(null);
+            }
+            readerExisting.setBooks(null);
+            readerRepository.delete(readerExisting);
         } else {
-            throw new ReaderNotFound("Selected reader not found");
+            throw new ReaderNotFoundException("Selected reader not found");
         }
     }
 
@@ -65,7 +68,7 @@ public class ReaderService {
             reader.setName(newReader.getName());
             reader.setSurname(newReader.getSurname());
         } else {
-            throw new ReaderNotFound("Selected reader not found");
+            throw new ReaderNotFoundException("Selected reader not found");
         }
     }
 
@@ -78,12 +81,12 @@ public class ReaderService {
     //return the book
 
 
-    public Set<Book> findAllBorrowedBooks(Long id){
+    public Collection<Book> findAllBorrowedBooks(Long id) {
         Optional<Reader> reader = readerRepository.findById(id);
         if (reader.isPresent()) {
             return reader.get().getBooks();
         } else {
-            throw new ReaderNotFound("Selected reader not found");
+            throw new ReaderNotFoundException("Selected reader not found");
         }
 
     }
