@@ -26,8 +26,7 @@ public class BookController {
 
     @GetMapping("api/books")
     public List<BookAPI> showBooks() {
-        List<Book> result = bookService.showAllBooks();
-
+        List<Book> result = bookService.findBooks();
         return BookAPI.toApi(result);
     }
 

@@ -1,7 +1,7 @@
 package ksiazkopol.library.reader;
 
 import ksiazkopol.library.book.Book;
-import ksiazkopol.library.book.BookRepository;
+import ksiazkopol.library.book.BookService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import ksiazkopol.library.dao.ReaderSearchRequestRepository;
 import org.springframework.stereotype.Service;
@@ -14,15 +14,17 @@ import java.util.Optional;
 @Service
 public class ReaderService {
 
-    private final BookRepository bookRepository;
+
     private final ReaderRepository readerRepository;
     private final ReaderSearchRequestRepository readerSearchRequestRepository;
+    private final BookService bookService;
 
 
-    public ReaderService(BookRepository bookRepository, ReaderRepository readerRepository, ReaderSearchRequestRepository readerSearchRequestRepository) {
-        this.bookRepository = bookRepository;
+    public ReaderService(ReaderRepository readerRepository, ReaderSearchRequestRepository readerSearchRequestRepository, BookService bookService) {
         this.readerRepository = readerRepository;
         this.readerSearchRequestRepository = readerSearchRequestRepository;
+        this.bookService = bookService;
+
     }
 
     public Reader addReader(Reader reader) {
@@ -76,19 +78,41 @@ public class ReaderService {
         return readerSearchRequestRepository.findByCriteria(readerSearchRequest);
     }
 
-    //borrow the book
 
-    //return the book
+    @Transactional
+    public void borrowBook(Long bookId, Long readerId) {
+        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
+        Reader reader = readerInRepository.get();
 
-
-    public Collection<Book> findAllBorrowedBooks(Long id) {
-        Optional<Reader> reader = readerRepository.findById(id);
-        if (reader.isPresent()) {
-            return reader.get().getBooks();
+        if (readerInRepository.isEmpty()) {
+            throw new ReaderNotFoundException("Selected reader not found");
         } else {
+            bookService.borrowBook(bookId, reader);
+        }
+
+    }
+
+    @Transactional
+    public void returnBook(Long bookId, Long readerId) {
+        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
+
+        if (!readerInRepository.isPresent()) {
             throw new ReaderNotFoundException("Selected reader not found");
         }
 
+
+        bookService.returnBook(bookId);
+    }
+
+
+    public Collection<Book> findAllBorrowedBooks(Long id) {
+        boolean readerInRepository = readerRepository.existsById(id);
+
+        if (readerInRepository) {
+            return bookService.findAllBooksForReader(id);
+        } else {
+            throw new ReaderNotFoundException("Selected reader not found");
+        }
     }
 
 }

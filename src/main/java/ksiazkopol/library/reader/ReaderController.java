@@ -5,11 +5,10 @@ import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,7 +31,9 @@ public class ReaderController {
     @GetMapping("api/readers")
     public List<ReaderAPI> findAllReaders() {
         List<Reader> result = readerService.findAllReaders();
-        return result.stream().map(ReaderAPI::new).toList();
+        return result.stream()
+                .map(ReaderAPI::new)
+                .toList();
     }
 
     @GetMapping("/api/readers/{id}")
@@ -75,20 +76,24 @@ public class ReaderController {
     @GetMapping("api/readers/{id}/borrowed-books")
     public List<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
         Collection<Book> result = readerService.findAllBorrowedBooks(id);
-        return result.stream().map(BookAPI::new).collect(Collectors.toList());
+        return result.stream()
+                .map(BookAPI::new)
+                .collect(Collectors.toList());
     }
+
 
     @PutMapping("api/readers/{readerId}/books/{id}")
     public ResponseEntity<BookAPI> borrowBook(@PathVariable Long id,
                                               @PathVariable Long readerId) {
-        bookService.borrowBook(id, readerId);
+
+        readerService.borrowBook(id, readerId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("api/readers/{readerId}/books/{id}")
     public ResponseEntity<BookAPI> returnBook(@PathVariable Long id,
                                               @PathVariable Long readerId) {
-        bookService.returnBook(id, readerId);
+        readerService.returnBook(id, readerId);
         return ResponseEntity.ok().build();
     }
 }

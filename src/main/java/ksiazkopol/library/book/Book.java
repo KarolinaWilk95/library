@@ -32,6 +32,8 @@ public class Book {
     private Long ISBN;
     @Column
     private LocalDate borrowDate;
+    @Column
+    private LocalDate returnDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "readerId")

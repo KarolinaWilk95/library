@@ -13,18 +13,15 @@ import java.util.List;
 @AllArgsConstructor
 public class BookAPI {
     private Long id;
-
     private String title;
-
     private String author;
-
     private String genre;
-
     private String publisher;
-
     private LocalDate publicationDate;
     private Long ISBN;
     private LocalDate borrowDate;
+    private LocalDate returnDate;
+
 
     public BookAPI(Book book) {
         this.id = book.getId();
@@ -35,6 +32,7 @@ public class BookAPI {
         this.author = book.getAuthor();
         this.title = book.getTitle();
         this.borrowDate = book.getBorrowDate();
+        this.returnDate = book.getReturnDate();
     }
 
     public Book toModel() {
@@ -47,6 +45,7 @@ public class BookAPI {
         model.setPublicationDate(publicationDate);
         model.setISBN(ISBN);
         model.setBorrowDate(borrowDate);
+        model.setReturnDate(returnDate);
         return model;
     }
 

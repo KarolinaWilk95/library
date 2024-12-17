@@ -12,6 +12,7 @@ CREATE TABLE books(
     genre VARCHAR(255),
     publisher VARCHAR(255),
     isbn BIGINT,
-    borrow_date DATE
+    borrow_date DATE,
+    return_date DATE
 );
 

@@ -2,9 +2,8 @@ package ksiazkopol.library.book;
 
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
-import ksiazkopol.library.reader.ReaderNotFoundException;
 import ksiazkopol.library.reader.Reader;
-import ksiazkopol.library.reader.ReaderRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,13 +15,11 @@ import java.util.Optional;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final ReaderRepository readerRepository;
     private final BookSearchRequestRepository bookSearchRequestRepository;
 
 
-    public BookService(BookRepository bookRepository, ReaderRepository readerRepository, BookSearchRequestRepository bookSearchRequestRepository) {
+    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository) {
         this.bookRepository = bookRepository;
-        this.readerRepository = readerRepository;
         this.bookSearchRequestRepository = bookSearchRequestRepository;
     }
 
@@ -30,45 +27,50 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public List<Book> showAllBooks() {
+    public List<Book> findBooks() {
         return bookRepository.findAll();
+    }
+
+    public List<Book> findAllBooksForReader(Long readerId) {
+        return bookRepository.showAllBooksByReader(readerId, Sort.by(Sort.Order.asc("borrowDate")));
     }
 
     public Optional<Book> findBookByID(Long id) {
         Optional<Book> bookInRepository = bookRepository.findById(id);
 
-        if (bookInRepository.isPresent()) {
-            return bookRepository.findById(id);
-        } else {
+        if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
+        return bookRepository.findById(id);
     }
 
     @Transactional
     public void deleteById(Long id) {
         Optional<Book> book = bookRepository.findById(id);
-        if (book.isPresent()) {
-            bookRepository.delete(book.get());
-        } else {
+
+        if (book.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
+
+        bookRepository.delete(book.get());
     }
 
     @Transactional
     public void updateByID(Long id, Book newBook) {
         Optional<Book> bookInRepository = bookRepository.findById(id);
 
-        if (bookInRepository.isPresent()) {
-            Book book = bookInRepository.get();
-            book.setTitle(newBook.getTitle());
-            book.setAuthor(newBook.getAuthor());
-            book.setGenre(newBook.getGenre());
-            book.setPublisher(newBook.getPublisher());
-            book.setPublicationDate(newBook.getPublicationDate());
-            book.setISBN(newBook.getISBN());
-        } else {
+        if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
+
+        Book book = bookInRepository.get();
+        book.setTitle(newBook.getTitle());
+        book.setAuthor(newBook.getAuthor());
+        book.setGenre(newBook.getGenre());
+        book.setPublisher(newBook.getPublisher());
+        book.setPublicationDate(newBook.getPublicationDate());
+        book.setISBN(newBook.getISBN());
+
     }
 
     public List<Book> search(BookSearchRequest bookSearchRequest) {
@@ -76,38 +78,42 @@ public class BookService {
     }
 
     @Transactional
-    public void borrowBook(Long id, Long readerId) {
-        //Optional <Book>
-        Optional<Book> bookInRepository = bookRepository.findById(id);
-        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
-        LocalDate currentDate = LocalDate.now();
+    public void returnBook(Long bookId) {
+        Optional<Book> bookInRepository = bookRepository.findById(bookId);
 
-        if (readerInRepository.isEmpty()) {
-            throw new ReaderNotFoundException("Selected reader not found");
-        } else if (bookInRepository.isEmpty()) {
+        if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
-        } else if (bookInRepository.get().getBorrowDate() != null) {
-            throw new BorrowedBookException("Selected book is already borrowed");
-        } else {
-            Book book = bookInRepository.get();
-            book.setReader(readerInRepository.get());
-            book.setBorrowDate(currentDate);
         }
+        Book book = bookInRepository.get();
+        book.setReader(null);
+        book.setBorrowDate(null);
+        book.setReturnDate(null);
+
     }
 
     @Transactional
-    public void returnBook(Long id, Long readerId) {
-        Optional<Book> bookInRepository = bookRepository.findById(id);
-        Optional<Reader> readerInRepository = readerRepository.findById(readerId);
+    public Book borrowBook(Long bookId, Reader reader) {
 
-        if (!readerInRepository.isPresent()) {
-            throw new ReaderNotFoundException("Selected reader not found");
-        } else if (!bookInRepository.isPresent()) {
+        Optional<Book> bookInRepository = bookRepository.findById(bookId);
+
+        if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
-        } else {
-            Book book = bookInRepository.get();
-            book.setReader(null);
-            book.setBorrowDate(null);
         }
+
+        Book book = bookInRepository.get();
+
+        if (book.getBorrowDate() != null) {
+            throw new BorrowedBookException("Selected book is already borrowed");
+        }
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate returnDate = currentDate.plusDays(7);
+        book.setBorrowDate(currentDate);
+        book.setReturnDate(returnDate);
+        book.setReader(reader);
+
+        return book;
     }
+
+
 }
