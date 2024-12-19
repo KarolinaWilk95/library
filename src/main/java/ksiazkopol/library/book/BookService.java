@@ -41,22 +41,23 @@ public class BookService {
         if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
-        return bookRepository.findById(id);
+        return bookInRepository;
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public Book deleteById(Long id) {
         Optional<Book> book = bookRepository.findById(id);
 
         if (book.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
 
-        bookRepository.delete(book.get());
+        bookRepository.deleteById(id);
+        return book.get();
     }
 
     @Transactional
-    public void updateByID(Long id, Book newBook) {
+    public Book updateByID(Long id, Book newBook) {
         Optional<Book> bookInRepository = bookRepository.findById(id);
 
         if (bookInRepository.isEmpty()) {
@@ -71,6 +72,7 @@ public class BookService {
         book.setPublicationDate(newBook.getPublicationDate());
         book.setISBN(newBook.getISBN());
 
+        return bookRepository.save(book);
     }
 
     public List<Book> search(BookSearchRequest bookSearchRequest) {
@@ -78,7 +80,7 @@ public class BookService {
     }
 
     @Transactional
-    public void returnBook(Long bookId) {
+    public Book returnBook(Long bookId) {
         Optional<Book> bookInRepository = bookRepository.findById(bookId);
 
         if (bookInRepository.isEmpty()) {
@@ -89,6 +91,7 @@ public class BookService {
         book.setBorrowDate(null);
         book.setReturnDate(null);
 
+        return book;
     }
 
     @Transactional
