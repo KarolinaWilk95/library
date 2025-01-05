@@ -40,7 +40,7 @@ public class ReaderService {
         Optional<Reader> readerInRepository = readerRepository.findById(id);
 
         if (readerInRepository.isPresent()) {
-            return readerRepository.findById(id);
+            return readerInRepository;
         } else {
             throw new ReaderNotFoundException("Selected reader not found");
         }
@@ -59,6 +59,8 @@ public class ReaderService {
         } else {
             throw new ReaderNotFoundException("Selected reader not found");
         }
+
+
     }
 
     @Transactional
@@ -82,11 +84,11 @@ public class ReaderService {
     @Transactional
     public void borrowBook(Long bookId, Long readerId) {
         Optional<Reader> readerInRepository = readerRepository.findById(readerId);
-        Reader reader = readerInRepository.get();
 
         if (readerInRepository.isEmpty()) {
             throw new ReaderNotFoundException("Selected reader not found");
         } else {
+            Reader reader = readerInRepository.get();
             bookService.borrowBook(bookId, reader);
         }
 

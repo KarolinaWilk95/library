@@ -5,10 +5,11 @@ import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController

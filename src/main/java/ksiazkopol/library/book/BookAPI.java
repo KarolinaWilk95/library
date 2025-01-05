@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -50,6 +51,11 @@ public class BookAPI {
     }
 
     public static List<BookAPI> toApi(Collection<Book> modelBooks) {
+
+        if (modelBooks == null || modelBooks.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         return modelBooks.stream()
                 .map((BookAPI::new))
                 .toList();

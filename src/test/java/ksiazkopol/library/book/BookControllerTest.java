@@ -29,21 +29,22 @@ class BookControllerTest {
     void addBook() {
         //given
 
-        var book = new BookAPI();
+        var book = new Book();
         book.setId(null);
-        var newBook = new BookAPI();
+        var newBook = new Book();
         book.setId(1L);
 
-        when(bookService.addBook(book.toModel())).thenReturn(newBook.toModel());
+        when(bookService.addBook(book)).thenReturn(newBook);
 
         //when
 
-        var result = bookController.addBook(new BookAPI(book.toModel()));
+        BookAPI bookToModel = new BookAPI(book);
+        var result = bookController.addBook(bookToModel);
 
         //then
 
-        verify(bookService).addBook(book.toModel());
-        assertThat(result).isEqualTo(newBook);
+        verify(bookService).addBook(book);
+        assertThat(result.getId()).isEqualTo(newBook.getId());
     }
 
     @Test
@@ -90,8 +91,6 @@ class BookControllerTest {
         //given
 
         Long bookId = 1L;
-        var bookExist = new BookAPI();
-        bookExist.setId(bookId);
 
         when(bookService.findBookByID(bookId)).thenReturn(Optional.empty());
 
@@ -148,7 +147,6 @@ class BookControllerTest {
     }
 
 
-    //?????? metoda w serwisie zmienione z void na book
     @Test
     void updateByIDIfExist() {
         //given
