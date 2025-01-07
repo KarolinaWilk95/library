@@ -28,7 +28,6 @@ class BookControllerTest {
     @Test
     void addBook() {
         //given
-
         var book = new Book();
         book.setId(null);
         var newBook = new Book();
@@ -37,30 +36,27 @@ class BookControllerTest {
         when(bookService.addBook(book)).thenReturn(newBook);
 
         //when
-
         BookAPI bookToModel = new BookAPI(book);
         var result = bookController.addBook(bookToModel);
 
         //then
-
         verify(bookService).addBook(book);
+
         assertThat(result.getId()).isEqualTo(newBook.getId());
     }
 
     @Test
     void showBooks() {
         //given
-
         List<Book> listOfBooks = new ArrayList<>();
         when(bookService.findBooks()).thenReturn(listOfBooks);
 
         //when
-
         var result = bookController.findBooks();
 
         //then
-
         verify(bookService).findBooks();
+
         assertThat(result).isEqualTo(listOfBooks);
 
     }
@@ -68,19 +64,17 @@ class BookControllerTest {
     @Test
     void findByIDIfExist() {
         //given
-
         Long bookId = 1L;
         var bookExist = new BookAPI();
         bookExist.setId(bookId);
         when(bookService.findBookByID(bookId)).thenReturn(Optional.<Book>of(bookExist.toModel()));
 
         //when
-
         var result = bookController.findByID(bookId);
 
         //then
-
         verify(bookService).findBookByID(bookId);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isEqualTo(bookExist);
 
@@ -89,18 +83,16 @@ class BookControllerTest {
     @Test
     void findByIDIfNotExist() {
         //given
-
         Long bookId = 1L;
 
         when(bookService.findBookByID(bookId)).thenReturn(Optional.empty());
 
         //when
-
         var result = bookController.findByID(bookId);
 
         //then
-
         verify(bookService).findBookByID(bookId);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(result.getBody()).isNull();
 
@@ -109,20 +101,18 @@ class BookControllerTest {
     @Test
     void deleteByIDIfExist() {
         //given
-
         Long id = 1L;
-        var bookExist = new BookAPI();
+        var bookExist = new Book();
         bookExist.setId(id);
 
-        doNothing().when(bookService).deleteById(id);
+       when(bookService.deleteById(id)).thenReturn(bookExist);
 
         //when
-
         var result = bookController.deleteByID(id);
 
         //then
-
         verify(bookService).deleteById(id);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
@@ -130,18 +120,16 @@ class BookControllerTest {
     @Test
     void deleteByIDIfNotExist() {
         //given
-
         Long id = 1L;
 
         doThrow(BookNotFoundException.class).when(bookService).deleteById(id);
 
         //when
-
         var result = bookController.deleteByID(id);
 
         //then
-
         verify(bookService).deleteById(id);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
     }
@@ -150,7 +138,6 @@ class BookControllerTest {
     @Test
     void updateByIDIfExist() {
         //given
-
         Long bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -172,12 +159,11 @@ class BookControllerTest {
         when(bookService.updateByID(bookId, updatedBook)).thenReturn(updatedBook);
 
         //when
-
         var result = bookController.updateByID(bookId, updatedBook);
 
         //then
-
         verify(bookService).updateByID(bookId, updatedBook);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isNull();
     }
@@ -185,7 +171,6 @@ class BookControllerTest {
     @Test
     void updateByIDIfNotExist() {
         //given
-
         Long bookId = 1L;
 
         Book updatedBook = new Book();
@@ -196,12 +181,11 @@ class BookControllerTest {
         when(bookService.updateByID(bookId, updatedBook)).thenThrow(BookNotFoundException.class);
 
         //when
-
         var result = bookController.updateByID(bookId, updatedBook);
 
         //then
-
         verify(bookService).updateByID(bookId, updatedBook);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
     }
@@ -210,7 +194,6 @@ class BookControllerTest {
     @Test
     void searchFoundMatch() {
         //given
-
         var request = new BookSearchRequest();
         request.setAuthor("Rowling");
         var book = new Book();
@@ -220,12 +203,11 @@ class BookControllerTest {
         when(bookService.search(request)).thenReturn(bookList);
 
         //when
-
         var result = bookController.search("Rowling", null, null, null, null, null, null);
 
         //then
-
         verify(bookService).search(request);
+
         var expectedBookApi = new BookAPI();
         expectedBookApi.setAuthor("J.K.Rowling");
 

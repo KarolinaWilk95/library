@@ -86,6 +86,11 @@ public class BookService {
         if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
+
+        if (bookInRepository.get().getBorrowDate() == null) {
+            throw new BookNotFoundException("Selected book wasn't borrowed");
+        }
+
         Book book = bookInRepository.get();
         book.setReader(null);
         book.setBorrowDate(null);
@@ -105,7 +110,7 @@ public class BookService {
 
         Book book = bookInRepository.get();
 
-        if (book.getBorrowDate() != null) {
+        if (book.getReader() != null) {
             throw new BorrowedBookException("Selected book is already borrowed");
         }
 

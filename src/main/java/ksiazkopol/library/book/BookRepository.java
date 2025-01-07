@@ -16,5 +16,4 @@ public interface BookRepository extends JpaRepository<Book, Long>, PagingAndSort
     @Query("select b from Book b where b.reader.id = :readerId ")
     List<Book> showAllBooksByReader(@Param("readerId") Long readerId, Sort sort);
 
-
 }

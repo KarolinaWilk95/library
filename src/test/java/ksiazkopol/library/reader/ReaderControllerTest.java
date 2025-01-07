@@ -26,7 +26,6 @@ class ReaderControllerTest {
     @Test
     void addOneReader() {
         //given
-
         var reader = new Reader();
         var newReader = new Reader();
         reader.setId(null);
@@ -38,12 +37,11 @@ class ReaderControllerTest {
         ReaderAPI readerToModel = new ReaderAPI(reader);
 
         //when
-
         var result = readerController.addReader(readerToModel);
 
         //then
-
         verify(readerService).addReader(reader);
+
         assertThat(result.getId()).isEqualTo(newReader.getId());
         assertThat(result.getBooks()).isEqualTo(newReader.getBooks());
     }
@@ -52,17 +50,16 @@ class ReaderControllerTest {
     @Test
     void findAllReaders() {
         //given
-
         List<Reader> readers = new ArrayList<>();
+
         when(readerService.findAllReaders()).thenReturn(readers);
 
         //when
-
         var result = readerController.findAllReaders();
 
         //then
-
         verify(readerService).findAllReaders();
+
         assertThat(result).isEqualTo(readers);
 
     }
@@ -71,19 +68,18 @@ class ReaderControllerTest {
     @Test
     void findByIDIfExist() {
         //given
-
         Long id = 1L;
         Reader reader = new Reader();
         reader.setId(id);
+
         when(readerService.getReaderByID(id)).thenReturn(Optional.of(reader));
 
         //when
-
         var result = readerController.findByID(id);
 
         //then
-
         verify(readerService).getReaderByID(id);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody().getId()).isEqualTo(reader.getId());
 
@@ -92,18 +88,16 @@ class ReaderControllerTest {
     @Test
     void findByIDIfNotExist() {
         //given
-
         Long id = 1L;
 
         when(readerService.getReaderByID(id)).thenReturn(Optional.empty());
 
         //when
-
         var result = readerController.findByID(id);
 
         //then
-
         verify(readerService).getReaderByID(id);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(result.getBody()).isNull();
 
@@ -115,12 +109,13 @@ class ReaderControllerTest {
         Long id = 1L;
 
         doNothing().when(readerService).deleteByID(id);
-        //when
 
+        //when
         var result = readerController.deleteByID(id);
 
         //then
         verify(readerService).deleteByID(id);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
@@ -145,50 +140,45 @@ class ReaderControllerTest {
         doNothing().when(readerService).updateByID(id, updatedReader);
 
         //when
-
         var result = readerController.updateByID(id, updatedReader);
 
         //then
-
         verify(readerService).updateByID(id, updatedReader);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void borrowBook() {
         //given
-
         Long bookId = 1L;
         Long readerId = 1L;
 
         doNothing().when(readerService).borrowBook(bookId, readerId);
 
         //when
-
         var result = readerController.borrowBook(bookId, readerId);
 
         //then
-
         verify(readerService).borrowBook(bookId, readerId);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void returnBook() {
         //given
-
         Long bookId = 1L;
         Long readerId = 1L;
 
         doNothing().when(readerService).returnBook(bookId, readerId);
 
         //when
-
         var result = readerController.returnBook(bookId, readerId);
 
         //then
-
         verify(readerService).returnBook(bookId, readerId);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

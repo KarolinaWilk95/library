@@ -32,7 +32,6 @@ class BookServiceTest {
     @Test
     void addBook() {
         //given
-
         Book book = new Book();
         book.setId(null);
 
@@ -42,12 +41,11 @@ class BookServiceTest {
         when(bookRepository.save(book)).thenReturn(savedBook);
 
         //when
-
         var result = bookService.addBook(book);
 
         //then
-
         verify(bookRepository).save(book);
+
         assertThat(result).isEqualTo(savedBook);
 
     }
@@ -55,7 +53,6 @@ class BookServiceTest {
     @Test
     void findBooks() {
         //given
-
         Book book = new Book();
         book.setId(1L);
         List<Book> bookList = List.of(book);
@@ -63,12 +60,11 @@ class BookServiceTest {
         when(bookRepository.findAll()).thenReturn(bookList);
 
         //when
-
         var result = bookService.findBooks();
 
         //then
-
         verify(bookRepository).findAll();
+
         assertThat(result).isEqualTo(bookList);
 
     }
@@ -76,44 +72,39 @@ class BookServiceTest {
     @Test
     void findAllBooksForReaderIfExist() {
         //given
-
         var idReader = 1L;
         List<Book> bookList = List.of();
 
         when(bookRepository.showAllBooksByReader(idReader, Sort.by(Sort.Order.asc("borrowDate")))).thenReturn(bookList);
 
         //when
-
         var result = bookService.findAllBooksForReader(idReader);
 
         //then
-
         verify(bookRepository).showAllBooksByReader(idReader, Sort.by(Sort.Order.asc("borrowDate")));
+
         assertThat(result).isEqualTo(bookList);
     }
 
     @Test
     void findAllBooksForReaderIfNotExist() {
-
         //given
         List<Book> bookList = List.of();
 
         when(bookRepository.showAllBooksByReader(null, Sort.by(Sort.Order.asc("borrowDate")))).thenReturn(bookList);
 
         //when
-
         var result = bookService.findAllBooksForReader(null);
 
         //then
-
         verify(bookRepository).showAllBooksByReader(null, Sort.by(Sort.Order.asc("borrowDate")));
+
         assertThat(result).isEmpty();
     }
 
     @Test
     void findBookByIDIfExist() {
         //given
-
         var idBook = 1L;
         Book book = new Book();
         book.setId(idBook);
@@ -121,12 +112,11 @@ class BookServiceTest {
         when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
 
         //when
-
         var result = bookService.findBookByID(idBook);
 
         //then
-
         verify(bookRepository).findById(idBook);
+
         assertThat(result).hasValue(book);
     }
 
@@ -137,12 +127,11 @@ class BookServiceTest {
         when(bookRepository.findById(null)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(BookNotFoundException.class, () -> bookService.findBookByID(null));
 
         //then
-
         verify(bookRepository).findById(null);
+
         assertThat(result).hasMessage("Selected book not found");
 
     }
@@ -150,7 +139,6 @@ class BookServiceTest {
     @Test
     void deleteByIdIfExist() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -159,11 +147,9 @@ class BookServiceTest {
         doNothing().when(bookRepository).deleteById(bookId);
 
         //when
-
         bookService.deleteById(bookId);
 
         //then
-
         verify(bookRepository).deleteById(bookId);
         verify(bookRepository).findById(bookId);
 
@@ -172,16 +158,14 @@ class BookServiceTest {
     @Test
     void deleteByIdIfNotExist() {
         //given
-
         when(bookRepository.findById(null)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(BookNotFoundException.class, () -> bookService.deleteById(null));
 
         //then
-
         verify(bookRepository).findById(null);
+
         assertThat(result).hasMessage("Selected book not found");
 
 
@@ -190,7 +174,6 @@ class BookServiceTest {
     @Test
     void updateByIDIfExist() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -215,20 +198,18 @@ class BookServiceTest {
         when(bookRepository.save(updatedBook)).thenReturn(updatedBook);
 
         //when
-
         var result = bookService.updateByID(bookId, updatedBook);
 
         //then
-
         verify(bookRepository).findById(bookId);
         verify(bookRepository).save(updatedBook);
+
         assertThat(result).isEqualTo(updatedBook);
     }
 
     @Test
     void updateByIDIfNotExist() {
         //given
-
         var bookId = 1L;
         Book updatedBook = new Book();
         updatedBook.setId(bookId);
@@ -236,12 +217,11 @@ class BookServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(BookNotFoundException.class, () -> bookService.updateByID(bookId, updatedBook));
 
         //then
-
         verify(bookRepository).findById(bookId);
+
         assertThat(result).hasMessage("Selected book not found");
 
     }
@@ -249,7 +229,6 @@ class BookServiceTest {
     @Test
     void search() {
         //given
-
         var searchRequest = new BookSearchRequest();
         searchRequest.setAuthor("Rowling");
         Book book = new Book();
@@ -260,19 +239,17 @@ class BookServiceTest {
         when(bookSearchRequestRepository.findByCriteria(searchRequest)).thenReturn(bookList);
 
         //when
-
         var result = bookService.search(searchRequest);
 
         //then
-
         verify(bookSearchRequestRepository).findByCriteria(searchRequest);
+
         assertThat(result).isEqualTo(bookList);
     }
 
     @Test
     void returnBookIfCorrectId() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -280,12 +257,11 @@ class BookServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
 
         //when
-
         var result = bookService.returnBook(bookId);
 
         //then
-
         verify(bookRepository).findById(bookId);
+
         assertThat(result).isEqualTo(book);
 
 
@@ -294,7 +270,6 @@ class BookServiceTest {
     @Test
     void returnBookIfNotCorrectId() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -302,12 +277,11 @@ class BookServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(BookNotFoundException.class, () -> bookService.returnBook(bookId));
 
         //then
-
         verify(bookRepository).findById(bookId);
+
         assertThat(result).hasMessage("Selected book not found");
 
     }
@@ -315,7 +289,6 @@ class BookServiceTest {
     @Test
     void borrowBookIsAvailable() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -324,12 +297,11 @@ class BookServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
 
         //when
-
         var result = bookService.borrowBook(bookId, reader);
 
         //then
-
         verify(bookRepository).findById(bookId);
+
         assertThat(result).isEqualTo(book);
 
     }
@@ -337,7 +309,6 @@ class BookServiceTest {
     @Test
     void borrowBookNotCorrectId() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -346,12 +317,11 @@ class BookServiceTest {
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(BookNotFoundException.class, () -> bookService.borrowBook(bookId, reader));
 
         //then
-
         verify(bookRepository).findById(bookId);
+
         assertThat(result).hasMessage("Selected book not found");
 
     }
@@ -359,7 +329,6 @@ class BookServiceTest {
     @Test
     void borrowBookAlreadyBorrowed() {
         //given
-
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
@@ -371,11 +340,9 @@ class BookServiceTest {
 //        when(book.getBorrowDate()).thenReturn(date);
 
         //when
-
         var result = assertThrows(BorrowedBookException.class, () -> bookService.borrowBook(bookId, reader));
 
         //then
-
         verify(bookRepository).findById(bookId);
 
         assertThat(result).hasMessage("Selected book is already borrowed");

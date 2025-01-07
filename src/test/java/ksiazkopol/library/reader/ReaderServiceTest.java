@@ -29,7 +29,6 @@ class ReaderServiceTest {
     @Test
     void addReader() {
         //given
-
         Long readerId = 1L;
         var reader = new Reader();
         reader.setId(null);
@@ -39,12 +38,11 @@ class ReaderServiceTest {
         when(readerRepository.save(reader)).thenReturn(newReader);
 
         //when
-
         var result = readerService.addReader(reader);
 
         //then
-
         verify(readerRepository).save(reader);
+
         assertThat(result).isEqualTo(newReader);
 
     }
@@ -52,18 +50,16 @@ class ReaderServiceTest {
     @Test
     void findAllReaders() {
         //given
-
         var listOfReaders = new ArrayList<Reader>();
 
         when(readerRepository.findAll()).thenReturn(listOfReaders);
 
         //when
-
         var result = readerService.findAllReaders();
 
         //then
-
         verify(readerRepository).findAll();
+
         assertThat(result).isEqualTo(listOfReaders);
 
     }
@@ -71,7 +67,6 @@ class ReaderServiceTest {
     @Test
     void getReaderByIDIfExist() {
         //given
-
         Long readerId = 1L;
         Reader reader = new Reader();
         reader.setId(readerId);
@@ -79,12 +74,11 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.of(reader));
 
         //when
-
         var result = readerService.getReaderByID(readerId);
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasValue(reader);
 
     }
@@ -92,18 +86,16 @@ class ReaderServiceTest {
     @Test
     void getReaderByIDIfNotExist() {
         //given
-
         Long readerId = 1L;
 
         when(readerRepository.findById(readerId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.getReaderByID(readerId));
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
 
     }
@@ -111,7 +103,6 @@ class ReaderServiceTest {
     @Test
     void deleteByIDIfExist() {
         //given
-
         Long readerId = 1L;
         var reader = new Reader();
         reader.setId(readerId);
@@ -120,11 +111,9 @@ class ReaderServiceTest {
         doNothing().when(readerRepository).delete(reader);
 
         //when
-
         readerService.deleteByID(readerId);
 
         //then
-
         verify(readerRepository).delete(reader);
         verify(readerRepository).findById(readerId);
 
@@ -133,24 +122,21 @@ class ReaderServiceTest {
     @Test
     void deleteByIDIfNotExist() {
         //given
-
         Long readerId = 1L;
         when(readerRepository.findById(readerId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.deleteByID(readerId));
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
     }
 
     @Test
     void updateByIDIfExist() {
         //given
-
         Long readerId = 1L;
         var reader = new Reader();
         reader.setId(readerId);
@@ -165,11 +151,9 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.of(reader));
 
         //when
-
         readerService.updateByID(readerId, updatedReader);
 
         //then
-
         verify(readerRepository).findById(readerId);
 
     }
@@ -187,12 +171,11 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.updateByID(readerId, updatedReader));
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
 
     }
@@ -204,7 +187,6 @@ class ReaderServiceTest {
     @Test
     void borrowBook() {
         //given
-
         Long readerId = 1L;
         Long bookId = 1L;
         var book = new Book();
@@ -215,11 +197,9 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.of(reader));
 
         //when
-
         readerService.borrowBook(bookId, readerId);
 
         //then
-
         verify(readerRepository).findById(readerId);
         verify(bookService).borrowBook(bookId, reader);
 
@@ -228,7 +208,6 @@ class ReaderServiceTest {
     @Test
     void borrowBookIfReaderNotExist() {
         //given
-
         Long readerId = 1L;
         Long bookId = 1L;
         var book = new Book();
@@ -237,12 +216,11 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.borrowBook(bookId, readerId));
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
 
     }
@@ -250,7 +228,6 @@ class ReaderServiceTest {
     @Test
     void returnBook() {
         //given
-
         Long readerId = 1L;
         var reader = new Reader();
         reader.setId(readerId);
@@ -259,11 +236,9 @@ class ReaderServiceTest {
         when(readerRepository.findById(readerId)).thenReturn(Optional.of(reader));
 
         //when
-
         readerService.returnBook(bookId, readerId);
 
         //then
-
         verify(readerRepository).findById(readerId);
         verify(bookService).returnBook(bookId);
     }
@@ -271,36 +246,31 @@ class ReaderServiceTest {
     @Test
     void returnBookIfReaderNotExist() {
         //given
-
         Long bookId = 1L;
         Long readerId = 1L;
 
         when(readerRepository.findById(readerId)).thenReturn(Optional.empty());
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.returnBook(bookId, readerId));
 
         //then
-
         verify(readerRepository).findById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
     }
 
     @Test
     void findAllBorrowedBooks() {
         //given
-
         Long readerId = 1L;
 
         when(readerRepository.existsById(readerId)).thenReturn(true);
 
         //when
-
         var result = readerService.findAllBorrowedBooks(readerId);
 
         //then
-
         verify(readerRepository).existsById(readerId);
         verify(bookService).findAllBooksForReader(readerId);
 
@@ -309,17 +279,16 @@ class ReaderServiceTest {
     @Test
     void findAllBorrowedBooksIfReaderNotExist() {
         //given
-
         Long readerId = 1L;
 
         when(readerRepository.existsById(readerId)).thenReturn(false);
 
         //when
-
         var result = assertThrows(ReaderNotFoundException.class, () -> readerService.findAllBorrowedBooks(readerId));
 
         //then
         verify(readerRepository).existsById(readerId);
+
         assertThat(result).hasMessage("Selected reader not found");
     }
 }
