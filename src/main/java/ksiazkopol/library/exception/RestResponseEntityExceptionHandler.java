@@ -10,9 +10,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> bookNotFoundHandler(ResourceNotFoundException ex) {
+    public ResponseEntity<String> resourceNotFoundHandler(ResourceNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
 
     @ExceptionHandler(BorrowedBookException.class)
     public ResponseEntity<String> borrowedBookHandler(BorrowedBookException ex) {

@@ -1,6 +1,7 @@
 package ksiazkopol.library.book;
 
 import jakarta.persistence.*;
+import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.reader.Reader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,6 +39,10 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "readerId")
     private Reader reader;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bookSeriesId")
+    private BookSeries bookSeries;
 
 
 }
