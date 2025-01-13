@@ -42,10 +42,10 @@ class BookControllerIntegrationTest {
 
         bookRepository.deleteAll();
         List<Book> books = List.of(
-                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null),
-                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null),
-                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null),
-                new Book(null, "Harry Potter and the Sorcerers Stone", "J.K. Rowling", "Fantasy", "Bloomsbury Publishing", LocalDate.parse("1997-06-26"), 9780439023540L, null, null, null));
+                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null),
+                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null,null),
+                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null,null),
+                new Book(null, "Harry Potter and the Sorcerers Stone", "J.K. Rowling", "Fantasy", "Bloomsbury Publishing", LocalDate.parse("1997-06-26"), 9780439023540L, null, null, null,null));
         bookRepository.saveAll(books);
 
     }
@@ -73,7 +73,7 @@ class BookControllerIntegrationTest {
     @Test
     void addBook() {
         //given
-        Book newBook = new Book(null, "The Hunger Games", "Suzanne Collins", "Dystopian", "Scholastic Press", LocalDate.parse("2008-09-14"), 9780345391803L, null, null, null);
+        Book newBook = new Book(null, "The Hunger Games", "Suzanne Collins", "Dystopian", "Scholastic Press", LocalDate.parse("2008-09-14"), 9780345391803L, null, null, null,null);
 
         //when
         ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books", HttpMethod.POST, new HttpEntity<>(newBook), Book.class);
@@ -137,16 +137,18 @@ class BookControllerIntegrationTest {
         //given
 
         //when
-        ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.DELETE, null, Book.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getBody()).isEqualTo("Selected book not found");
+
     }
 
     @Test
     void updateBookIfExist() {
         //given
-        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null);
+        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null);
         Long id = bookRepository.findAll().get(0).getId();
 
         //when
@@ -160,13 +162,14 @@ class BookControllerIntegrationTest {
     @Test
     void updateBookIfNotExist() {
         //given
-        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null);
+        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null);
 
         //when
-        ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.PUT, new HttpEntity<>(updatedBook), Book.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.PUT, new HttpEntity<>(updatedBook), String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getBody()).isEqualTo("Selected book not found");
 
     }
 

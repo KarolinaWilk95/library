@@ -18,16 +18,17 @@ public class BookSeriesAPI {
 
 
     public BookSeriesAPI(BookSeries bookSeries) {
+        this.id = bookSeries.getId();
         this.nameOfSeries = bookSeries.getNameOfSeries();
         this.author = bookSeries.getAuthor();
-        bookSeriesList = BookAPI.toApi(bookSeries.getBook());
+        bookSeriesList = BookAPI.toApi(bookSeries.getBooks());
     }
 
     public BookSeries toModel() {
         BookSeries bookSeries = new BookSeries();
         bookSeries.setNameOfSeries(nameOfSeries);
         bookSeries.setAuthor(author);
-        bookSeries.setBook(null);
+        bookSeries.setBooks(null);
         return bookSeries;
     }
 }

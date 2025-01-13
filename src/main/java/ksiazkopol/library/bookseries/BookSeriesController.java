@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class BookSeriesController {
@@ -15,7 +14,7 @@ public class BookSeriesController {
         this.bookSeriesService = bookSeriesService;
     }
 
-    @GetMapping("/api/bookseries")
+    @GetMapping("/api/book-series")
     public List<BookSeriesAPI> findAllSeries() {
         List<BookSeries> bookSeriesList = bookSeriesService.findAll();
         return bookSeriesList.stream()
@@ -23,48 +22,40 @@ public class BookSeriesController {
                 .toList();
     }
 
-    @PostMapping("/api/bookseries")
-    public ResponseEntity<BookSeriesAPI> addBookSeries(@RequestBody BookSeries bookSeries) {
-        BookSeries result = bookSeriesService.addBookSeries(bookSeries);
+    @PostMapping("/api/book-series")
+    public BookSeriesAPI addBookSeries(@RequestBody BookSeriesAPI bookSeries) {
+        BookSeries result = bookSeriesService.addBookSeries(bookSeries.toModel());
+        return new BookSeriesAPI(result);
+    }
+
+    @DeleteMapping("/api/book-series/{id}")
+    public ResponseEntity<BookSeriesAPI> deleteBookSeries(@PathVariable Long id) {
+        bookSeriesService.deleteBookSeries(id);
+        return ResponseEntity.ok().build();
+
+    }
+
+    @GetMapping("/api/book-series/{id}")
+    public ResponseEntity<BookSeriesAPI> findById(@PathVariable Long id) {
+        BookSeries bookSeriesResponseEntity = bookSeriesService.findById(id);
+        return ResponseEntity.ok(new BookSeriesAPI(bookSeriesResponseEntity));
+    }
+
+    @PutMapping("/api/book-series/{id}")
+    public ResponseEntity<BookSeriesAPI> updateById(@PathVariable Long id, @RequestBody BookSeries bookSeries) {
+        BookSeries bookSeriesResponseEntity = bookSeriesService.updateById(id,bookSeries);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/api/bookseries/{id}")
-    public ResponseEntity<BookSeriesAPI> deleteBookSeries(@PathVariable Long id) {
-        Optional<BookSeries> bookSeriesOptional = bookSeriesService.findById(id);
-
-        if(bookSeriesOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            bookSeriesService.deleteBookSeries(id);
-            return ResponseEntity.ok().build();
-        }
+    @PutMapping("/api/book-series/{idBookSeries}/books/{idBook}")
+    public ResponseEntity<BookSeriesAPI> addBookToBookSeries(@PathVariable Long idBookSeries, @PathVariable Long idBook) {
+        bookSeriesService.addBookToBookSeries(idBookSeries, idBook);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/api/bookseries/{id}")
-    public ResponseEntity<BookSeriesAPI> findById(@PathVariable Long id) {
-
-        Optional<BookSeries> bookSeriesOptional = bookSeriesService.findById(id);
-
-        if (bookSeriesOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(new BookSeriesAPI(bookSeriesOptional.get()));
-        }
-
-
+    @DeleteMapping("/api/book-series/{idBookSeries}/books/{idBook}")
+    public ResponseEntity<BookSeriesAPI> deleteBookFromBookSeries(@PathVariable Long idBookSeries, @PathVariable Long idBook) {
+        bookSeriesService.deleteBookFromBookSeries(idBookSeries, idBook);
+        return ResponseEntity.ok().build();
     }
-
-    @PutMapping("/api/bookseries/{id}")
-    public ResponseEntity<BookSeriesAPI> updateById(@PathVariable Long id, @RequestBody BookSeries bookSeries) {
-        Optional<BookSeries> bookSeriesOptional = bookSeriesService.findById(id);
-
-        if (bookSeriesOptional.isPresent()) {
-            bookSeriesService.updateById(id, bookSeries);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-
     }
-}

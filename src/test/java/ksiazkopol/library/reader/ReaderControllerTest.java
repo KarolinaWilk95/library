@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,16 +91,13 @@ class ReaderControllerTest {
         //given
         Long id = 1L;
 
-        when(readerService.getReaderByID(id)).thenReturn(Optional.empty());
+        doThrow(ReaderNotFoundException.class).when(readerService).getReaderByID(id);
 
         //when
-        var result = readerController.findByID(id);
+        var result = assertThrows(ReaderNotFoundException.class, () -> readerController.findByID(id));
 
         //then
         verify(readerService).getReaderByID(id);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(result.getBody()).isNull();
 
     }
 

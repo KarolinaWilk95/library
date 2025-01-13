@@ -1,5 +1,6 @@
 package ksiazkopol.library.bookseries;
 
+import ksiazkopol.library.book.BookService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,9 +11,11 @@ import java.util.Optional;
 public class BookSeriesService {
 
     private final BookSeriesRepository bookSeriesRepository;
+    private final BookService bookService;
 
-    public BookSeriesService(BookSeriesRepository bookSeriesRepository) {
+    public BookSeriesService(BookSeriesRepository bookSeriesRepository, BookService bookService) {
         this.bookSeriesRepository = bookSeriesRepository;
+        this.bookService = bookService;
     }
 
     public List<BookSeries> findAll() {
@@ -34,14 +37,14 @@ public class BookSeriesService {
         }
     }
 
-    public Optional<BookSeries> findById(Long id) {
+    public BookSeries findById(Long id) {
         Optional<BookSeries> bookSeries = bookSeriesRepository.findById(id);
 
         if (bookSeries.isEmpty()) {
             throw new BookSeriesNotFoundException("Selected book series not found");
         }
 
-        return bookSeries;
+        return bookSeries.get();
     }
 
     @Transactional
@@ -57,5 +60,28 @@ public class BookSeriesService {
         bookSeries.setAuthor(updatedBookSeries.getAuthor());
 
         return bookSeriesRepository.save(bookSeries);
+    }
+
+
+    public void addBookToBookSeries(Long idBookSeries, Long idBook) {
+        Optional<BookSeries> bookSeriesOptional = bookSeriesRepository.findById(idBookSeries);
+
+        if (bookSeriesOptional.isEmpty()) {
+            throw new BookSeriesNotFoundException("Selected book series not found");
+        } else {
+            BookSeries bookSeries = bookSeriesOptional.get();
+            bookService.addBookToBookSeries(idBook, bookSeries);
+        }
+    }
+
+    public void deleteBookFromBookSeries(Long idBookSeries, Long idBook) {
+        Optional<BookSeries> bookSeriesOptional = bookSeriesRepository.findById(idBookSeries);
+
+        if(bookSeriesOptional.isEmpty()){
+            throw new BookSeriesNotFoundException("Selected book series not found");
+        }
+
+        bookService.deleteBookFromBookSeries(idBook);
+
     }
 }

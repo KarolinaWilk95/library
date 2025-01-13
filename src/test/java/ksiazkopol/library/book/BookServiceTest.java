@@ -1,5 +1,6 @@
 package ksiazkopol.library.book;
 
+import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -117,7 +118,7 @@ class BookServiceTest {
         //then
         verify(bookRepository).findById(idBook);
 
-        assertThat(result).hasValue(book);
+        assertThat(result).isEqualTo(book);
     }
 
     @Test
@@ -253,6 +254,8 @@ class BookServiceTest {
         var bookId = 1L;
         Book book = new Book();
         book.setId(bookId);
+        Reader reader = new Reader();
+        book.setReader(reader);
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
 
@@ -335,6 +338,7 @@ class BookServiceTest {
         LocalDate date = LocalDate.ofEpochDay(2024 - 12 - 19);
         book.setBorrowDate(date);
         Reader reader = new Reader();
+        book.setReader(reader);
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
 //        when(book.getBorrowDate()).thenReturn(date);
@@ -347,5 +351,121 @@ class BookServiceTest {
 
         assertThat(result).hasMessage("Selected book is already borrowed");
 
+    }
+
+    @Test
+    void addBookToBookSeries() {
+        //given
+        Book book = new Book();
+        Long idBook = 1L;
+        book.setId(idBook);
+        BookSeries bookSeries = new BookSeries();
+        Long idBookSeries = 1L;
+        bookSeries.setId(idBookSeries);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
+        when(bookRepository.save(book)).thenReturn(book);
+
+        //when
+        var result = bookService.addBookToBookSeries(idBook, bookSeries);
+
+        //then
+        verify(bookRepository).findById(idBook);
+        verify(bookRepository).save(book);
+        assertThat(result).isEqualTo(book);
+    }
+
+    @Test
+    void addBookToBookSeriesIfBookNotExist() {
+        //given
+        Long idBook = 1L;
+        BookSeries bookSeries = new BookSeries();
+        Long idBookSeries = 1L;
+        bookSeries.setId(idBookSeries);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.empty());
+
+        //when
+        var result = assertThrows(BookNotFoundException.class, () -> bookService.addBookToBookSeries(idBook, bookSeries));
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result).hasMessage("Selected book not found");
+
+    }
+
+    @Test
+    void addBookToBookSeriesBookAlreadyAssigned() {
+        //given
+        Book book = new Book();
+        Long idBook = 1L;
+        book.setId(idBook);
+        BookSeries bookSeries = new BookSeries();
+        Long idBookSeries = 1L;
+        bookSeries.setId(idBookSeries);
+        book.setBookSeries(bookSeries);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
+
+        //when
+        var result = assertThrows(BookAssignedException.class, () -> bookService.addBookToBookSeries(idBook, bookSeries));
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result).hasMessage("Selected book is already assigned to another book series");
+    }
+
+    @Test
+    void deleteBookFromBookSeries() {
+        //given
+        Book book = new Book();
+        Long idBook = 1L;
+        book.setId(idBook);
+        BookSeries bookSeries = new BookSeries();
+        Long idBookSeries = 1L;
+        bookSeries.setId(idBookSeries);
+        book.setBookSeries(bookSeries);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
+
+        //when
+        bookService.deleteBookFromBookSeries(idBook);
+
+        //then
+        verify(bookRepository).findById(idBook);
+        verify(bookRepository).save(book);
+    }
+
+    @Test
+    void deleteBookToBookSeriesIfBookNotExist() {
+        //given
+        Long idBook = 1L;
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.empty());
+
+        //when
+        var result = assertThrows(BookNotFoundException.class, () -> bookService.deleteBookFromBookSeries(idBook));
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result).hasMessage("Selected book not found");
+
+    }
+
+    @Test
+    void deleteBookToBookSeriesBookNeverAssigned() {
+        //given
+        Book book = new Book();
+        Long idBook = 1L;
+        book.setId(idBook);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
+
+        //when
+        var result = assertThrows(BookAssignedException.class, () -> bookService.deleteBookFromBookSeries(idBook));
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result).hasMessage("Selected book was never assigned to book series");
     }
 }

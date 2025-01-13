@@ -1,5 +1,6 @@
 package ksiazkopol.library.book;
 
+import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -35,13 +36,13 @@ public class BookService {
         return bookRepository.showAllBooksByReader(readerId, Sort.by(Sort.Order.asc("borrowDate")));
     }
 
-    public Optional<Book> findBookByID(Long id) {
+    public Book findBookByID(Long id) {
         Optional<Book> bookInRepository = bookRepository.findById(id);
 
         if (bookInRepository.isEmpty()) {
             throw new BookNotFoundException("Selected book not found");
         }
-        return bookInRepository;
+        return bookInRepository.get();
     }
 
     @Transactional
@@ -87,7 +88,7 @@ public class BookService {
             throw new BookNotFoundException("Selected book not found");
         }
 
-        if (bookInRepository.get().getBorrowDate() == null) {
+        if (bookInRepository.get().getReader() == null) {
             throw new BookNotFoundException("Selected book wasn't borrowed");
         }
 
@@ -119,9 +120,43 @@ public class BookService {
         book.setBorrowDate(currentDate);
         book.setReturnDate(returnDate);
         book.setReader(reader);
-
+        bookRepository.save(book);
         return book;
     }
 
 
+    public Book addBookToBookSeries(Long idBook, BookSeries bookSeries) {
+        Optional<Book> bookOptional = bookRepository.findById(idBook);
+
+        if (bookOptional.isEmpty()) {
+            throw new BookNotFoundException("Selected book not found");
+        }
+
+        Book book = bookOptional.get();
+
+        if (book.getBookSeries() != null) {
+            throw new BookAssignedException("Selected book is already assigned to another book series");
+        }
+
+        book.setBookSeries(bookSeries);
+        bookRepository.save(book);
+        return book;
+    }
+
+
+    public void deleteBookFromBookSeries(Long idBook) {
+        Optional<Book> bookOptional = bookRepository.findById(idBook);
+
+        if (bookOptional.isEmpty()) {
+            throw new BookNotFoundException("Selected book not found");
+        }
+
+        if (bookOptional.get().getBookSeries() == null) {
+            throw new BookAssignedException("Selected book was never assigned to book series");
+        }
+
+        Book book = bookOptional.get();
+        book.setBookSeries(null);
+        bookRepository.save(book);
+    }
 }

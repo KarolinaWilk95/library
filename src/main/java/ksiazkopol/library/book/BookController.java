@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class BookController {
@@ -32,34 +31,22 @@ public class BookController {
 
     @GetMapping("/api/books/{id}")
     public ResponseEntity<BookAPI> findByID(@PathVariable Long id) {
-        Optional<Book> book = bookService.findBookByID(id);
+        Book book = bookService.findBookByID(id);
+        return ResponseEntity.ok(new BookAPI(book));
 
-        if (book.isPresent()) {
-            return ResponseEntity.ok(new BookAPI(book.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @DeleteMapping("/api/books/{id}")
     public ResponseEntity<BookAPI> deleteByID(@PathVariable Long id) {
-        try {
-            bookService.deleteById(id);
-            return ResponseEntity.ok().build();
-        } catch (BookNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        bookService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/api/books/{id}")
     public ResponseEntity<BookAPI> updateByID(@PathVariable Long id, @RequestBody
     Book book) {
-        try {
-            bookService.updateByID(id, book);
-            return ResponseEntity.ok().build();
-        } catch (BookNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        bookService.updateByID(id, book);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/books/search")
@@ -97,25 +84,25 @@ public class BookController {
 
         Book book = new Book();
 
-
-        if (author != null) {
-            book.setAuthor(bookService.findBookByID(id).get().getAuthor());
-        }
-        if (title != null) {
-            book.setTitle(bookService.findBookByID(id).get().getTitle());
-        }
-        if (genre != null) {
-            book.setGenre(bookService.findBookByID(id).get().getGenre());
-        }
-        if (publisher != null) {
-            book.setPublisher(bookService.findBookByID(id).get().getPublisher());
-        }
-        if (publicationDate != null) {
-            book.setPublicationDate(bookService.findBookByID(id).get().getPublicationDate());
-        }
-        if (ISBN != null) {
-            book.setISBN(bookService.findBookByID(id).get().getISBN());
-        }
+//
+//        if (author != null) {
+//            book.setAuthor(bookService.findBookByID(id).get().getAuthor());
+//        }
+//        if (title != null) {
+//            book.setTitle(bookService.findBookByID(id).get().getTitle());
+//        }
+//        if (genre != null) {
+//            book.setGenre(bookService.findBookByID(id).get().getGenre());
+//        }
+//        if (publisher != null) {
+//            book.setPublisher(bookService.findBookByID(id).get().getPublisher());
+//        }
+//        if (publicationDate != null) {
+//            book.setPublicationDate(bookService.findBookByID(id).get().getPublicationDate());
+//        }
+//        if (ISBN != null) {
+//            book.setISBN(bookService.findBookByID(id).get().getISBN());
+//        }
 
 
         return ResponseEntity.ok(new BookAPI(book));

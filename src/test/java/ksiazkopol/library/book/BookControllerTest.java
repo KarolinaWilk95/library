@@ -11,9 +11,9 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +67,7 @@ class BookControllerTest {
         Long bookId = 1L;
         var bookExist = new BookAPI();
         bookExist.setId(bookId);
-        when(bookService.findBookByID(bookId)).thenReturn(Optional.<Book>of(bookExist.toModel()));
+        when(bookService.findBookByID(bookId)).thenReturn(bookExist.toModel());
 
         //when
         var result = bookController.findByID(bookId);
@@ -85,16 +85,13 @@ class BookControllerTest {
         //given
         Long bookId = 1L;
 
-        when(bookService.findBookByID(bookId)).thenReturn(Optional.empty());
+        doThrow(BookNotFoundException.class).when(bookService).findBookByID(bookId);
 
         //when
-        var result = bookController.findByID(bookId);
+        var result = assertThrows(BookNotFoundException.class, () -> bookController.findByID(bookId));
 
         //then
         verify(bookService).findBookByID(bookId);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(result.getBody()).isNull();
 
     }
 
@@ -105,7 +102,7 @@ class BookControllerTest {
         var bookExist = new Book();
         bookExist.setId(id);
 
-       when(bookService.deleteById(id)).thenReturn(bookExist);
+        when(bookService.deleteById(id)).thenReturn(bookExist);
 
         //when
         var result = bookController.deleteByID(id);
@@ -125,12 +122,10 @@ class BookControllerTest {
         doThrow(BookNotFoundException.class).when(bookService).deleteById(id);
 
         //when
-        var result = bookController.deleteByID(id);
+        var result = assertThrows(BookNotFoundException.class, () -> bookController.deleteByID(id));
 
         //then
         verify(bookService).deleteById(id);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
     }
 
@@ -176,17 +171,14 @@ class BookControllerTest {
         Book updatedBook = new Book();
         updatedBook.setId(bookId);
 
-//        doThrow(BookNotFoundException.class).when(bookService.updateByID(bookId, updatedBook));
-
-        when(bookService.updateByID(bookId, updatedBook)).thenThrow(BookNotFoundException.class);
+        doThrow(BookNotFoundException.class).when(bookService).updateByID(bookId, updatedBook);
 
         //when
-        var result = bookController.updateByID(bookId, updatedBook);
+        var result = assertThrows(BookNotFoundException.class, () -> bookController.updateByID(bookId, updatedBook));
+
 
         //then
         verify(bookService).updateByID(bookId, updatedBook);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 
     }
 

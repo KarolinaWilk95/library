@@ -27,6 +27,6 @@ public class BookSeries {
     private String author;
 
     @OneToMany(mappedBy = "bookSeries", fetch = FetchType.EAGER)
-    private Collection<Book> book;
+    private Collection<Book> books;
 
 }

@@ -23,13 +23,13 @@ public class ReaderController {
         this.bookService = bookService;
     }
 
-    @PostMapping("api/readers")
+    @PostMapping("/api/readers")
     public ReaderAPI addReader(@RequestBody ReaderAPI reader) {
         Reader result = readerService.addReader(reader.toModel());
         return new ReaderAPI(result);
     }
 
-    @GetMapping("api/readers")
+    @GetMapping("/api/readers")
     public List<ReaderAPI> findAllReaders() {
         List<Reader> result = readerService.findAllReaders();
         return result.stream()
@@ -40,11 +40,8 @@ public class ReaderController {
     @GetMapping("/api/readers/{id}")
     public ResponseEntity<ReaderAPI> findByID(@PathVariable Long id) {
         Optional<Reader> reader = readerService.getReaderByID(id);
-        if (reader.isPresent()) {
-            return ResponseEntity.ok(new ReaderAPI(reader.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(new ReaderAPI(reader.get()));
+
     }
 
     @DeleteMapping("/api/readers/{id}")
@@ -74,7 +71,7 @@ public class ReaderController {
                 .toList();
     }
 
-    @GetMapping("api/readers/{id}/borrowed-books")
+    @GetMapping("/api/readers/{id}/borrowed-books")
     public List<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
         Collection<Book> result = readerService.findAllBorrowedBooks(id);
         return result.stream()
@@ -83,7 +80,7 @@ public class ReaderController {
     }
 
 
-    @PutMapping("api/readers/{readerId}/books/{id}")
+    @PutMapping("/api/readers/{readerId}/books/{id}")
     public ResponseEntity<BookAPI> borrowBook(@PathVariable Long id,
                                               @PathVariable Long readerId) {
 
@@ -91,7 +88,7 @@ public class ReaderController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("api/readers/{readerId}/books/{id}")
+    @DeleteMapping("/api/readers/{readerId}/books/{id}")
     public ResponseEntity<BookAPI> returnBook(@PathVariable Long id,
                                               @PathVariable Long readerId) {
         readerService.returnBook(id, readerId);
