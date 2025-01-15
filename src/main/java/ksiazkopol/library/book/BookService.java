@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +29,40 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public List<Book> findBooks() {
-        return bookRepository.findAll();
+    public List<Book> findBooks(List<String> details) {
+        List<Book> bookList = bookRepository.findAll();
+        List<Book> newBookList = new ArrayList<>();
+
+
+        for (Book book : bookList) {
+            Book bookToList = new Book();
+            bookToList.setId(book.getId());
+            for (String detail : details) {
+                switch (detail) {
+                    case "title":
+                        bookToList.setTitle(book.getTitle());
+                        break;
+                    case "author":
+                        bookToList.setAuthor(book.getAuthor());
+                        break;
+                    case "genre":
+                        bookToList.setGenre(book.getGenre());
+                        break;
+                    case "publisher":
+                        bookToList.setPublisher(book.getPublisher());
+                        break;
+                    case "publicationDate":
+                        bookToList.setPublicationDate(book.getPublicationDate());
+                        break;
+                    case "ISBN":
+                        bookToList.setISBN(book.getISBN());
+                        break;
+                }
+            }
+            newBookList.add(bookToList);
+        }
+
+        return newBookList;
     }
 
     public List<Book> findAllBooksForReader(Long readerId) {
@@ -158,5 +191,41 @@ public class BookService {
         Book book = bookOptional.get();
         book.setBookSeries(null);
         bookRepository.save(book);
+    }
+
+    public Book showBookDetails(Long idBook, List<String> values) {
+        Optional<Book> bookOptional = bookRepository.findById(idBook);
+
+        if (bookOptional.isEmpty()) {
+            throw new BookNotFoundException("Selected book not found");
+        }
+
+        Book book = new Book();
+
+        for (String value : values) {
+            switch (value) {
+                case "title":
+                    book.setTitle(bookOptional.get().getTitle());
+                    break;
+                case "author":
+                    book.setAuthor(bookOptional.get().getAuthor());
+                    break;
+                case "genre":
+                    book.setGenre(bookOptional.get().getGenre());
+                    break;
+                case "publisher":
+                    book.setPublisher(bookOptional.get().getPublisher());
+                    break;
+                case "publicationDate":
+                    book.setPublicationDate(bookOptional.get().getPublicationDate());
+                    break;
+                case "ISBN":
+                    book.setISBN(bookOptional.get().getISBN());
+                    break;
+            }
+        }
+
+        return book;
+
     }
 }

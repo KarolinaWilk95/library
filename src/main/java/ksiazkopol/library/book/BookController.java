@@ -24,8 +24,8 @@ public class BookController {
     }
 
     @GetMapping("api/books")
-    public List<BookAPI> findBooks() {
-        List<Book> result = bookService.findBooks();
+    public List<BookAPI> findBooks(@RequestParam List<String> details) {
+        List<Book> result = bookService.findBooks(details);
         return BookAPI.toApi(result);
     }
 
@@ -74,38 +74,11 @@ public class BookController {
 
     //http://localhost:8080/api/books/1/showBookDetails?author&title&genre
     @GetMapping("/api/books/{id}/showBookDetails")
-    public ResponseEntity<BookAPI> showBookDetails(@PathVariable Long id,
-                                                   @RequestParam(name = "author", required = false) String author,
-                                                   @RequestParam(name = "title", required = false) String title,
-                                                   @RequestParam(name = "genre", required = false) String genre,
-                                                   @RequestParam(name = "publisher", required = false) String publisher,
-                                                   @RequestParam(name = "date", required = false) LocalDate publicationDate,
-                                                   @RequestParam(name = "ISBN", required = false) Long ISBN) {
+    public BookAPI showBookDetails(@PathVariable Long id,
+                                                   @RequestParam List<String> values){
 
-        Book book = new Book();
-
-//
-//        if (author != null) {
-//            book.setAuthor(bookService.findBookByID(id).get().getAuthor());
-//        }
-//        if (title != null) {
-//            book.setTitle(bookService.findBookByID(id).get().getTitle());
-//        }
-//        if (genre != null) {
-//            book.setGenre(bookService.findBookByID(id).get().getGenre());
-//        }
-//        if (publisher != null) {
-//            book.setPublisher(bookService.findBookByID(id).get().getPublisher());
-//        }
-//        if (publicationDate != null) {
-//            book.setPublicationDate(bookService.findBookByID(id).get().getPublicationDate());
-//        }
-//        if (ISBN != null) {
-//            book.setISBN(bookService.findBookByID(id).get().getISBN());
-//        }
-
-
-        return ResponseEntity.ok(new BookAPI(book));
+        Book result = bookService.showBookDetails(id, values);
+        return new BookAPI(result);
 
     }
 }
