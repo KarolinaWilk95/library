@@ -16,4 +16,17 @@ public interface BookRepository extends JpaRepository<Book, Long>, PagingAndSort
     @Query("select b from Book b where b.reader.id = :readerId ")
     List<Book> showAllBooksByReader(@Param("readerId") Long readerId, Sort sort);
 
+    @Query("select count(b) from Book b")
+    long countAllBooks();
+
+    @Query("select count(b) from Book b where b.reader is not null and b.borrowDate is not null")
+    long countBorrowedBooks();
+
+    @Query("select count(b) from Book b where b.reader is null and b.borrowDate is null")
+    long countBooksAvailableToBorrow();
+
+    @Query("select count(b) from Book b where b.expectedReturnDate - b.borrowDate > 7")
+    long countBooksAfterTheDueDate();
+
+
 }

@@ -11,10 +11,13 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final BookRepository bookRepository;
 
 
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService,
+                          BookRepository bookRepository) {
         this.bookService = bookService;
+        this.bookRepository = bookRepository;
     }
 
     @PostMapping("api/books")
@@ -26,6 +29,12 @@ public class BookController {
     @GetMapping("api/books")
     public List<BookAPI> findBooks(@RequestParam List<String> details) {
         List<Book> result = bookService.findBooks(details);
+        return BookAPI.toApi(result);
+    }
+
+    @GetMapping("api/allBooks")
+    public List<BookAPI> findAllBooks() {
+        List<Book> result = bookService.findAllBooks();
         return BookAPI.toApi(result);
     }
 
@@ -75,10 +84,16 @@ public class BookController {
     //http://localhost:8080/api/books/1/showBookDetails?author&title&genre
     @GetMapping("/api/books/{id}/showBookDetails")
     public BookAPI showBookDetails(@PathVariable Long id,
-                                                   @RequestParam List<String> values){
+                                   @RequestParam List<String> values) {
 
         Book result = bookService.showBookDetails(id, values);
         return new BookAPI(result);
 
+    }
+
+    @GetMapping("/api/books/info")
+    public List<String> booksStatus() {
+        var result = bookService.booksStatus();
+        return result;
     }
 }

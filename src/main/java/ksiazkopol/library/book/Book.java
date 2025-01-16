@@ -34,7 +34,7 @@ public class Book {
     @Column
     private LocalDate borrowDate;
     @Column
-    private LocalDate returnDate;
+    private LocalDate expectedReturnDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "readerId")
@@ -43,6 +43,5 @@ public class Book {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bookSeriesId")
     private BookSeries bookSeries;
-
 
 }

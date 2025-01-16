@@ -23,7 +23,7 @@ public class BookAPI {
     private LocalDate publicationDate;
     private Long ISBN;
     private LocalDate borrowDate;
-    private LocalDate returnDate;
+    private LocalDate expectedReturnDate;
 
 
     public BookAPI(Book book) {
@@ -35,7 +35,7 @@ public class BookAPI {
         this.author = book.getAuthor();
         this.title = book.getTitle();
         this.borrowDate = book.getBorrowDate();
-        this.returnDate = book.getReturnDate();
+        this.expectedReturnDate = book.getExpectedReturnDate();
     }
 
     public Book toModel() {
@@ -48,7 +48,7 @@ public class BookAPI {
         model.setPublicationDate(publicationDate);
         model.setISBN(ISBN);
         model.setBorrowDate(borrowDate);
-        model.setReturnDate(returnDate);
+        model.setExpectedReturnDate(expectedReturnDate);
         return model;
     }
 

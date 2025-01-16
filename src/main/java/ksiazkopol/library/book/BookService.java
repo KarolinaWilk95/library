@@ -1,6 +1,7 @@
 package ksiazkopol.library.book;
 
 import ksiazkopol.library.bookseries.BookSeries;
+import ksiazkopol.library.borrowingBooksInformation.BorrowingBooksInformationService;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -18,16 +19,23 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookSearchRequestRepository bookSearchRequestRepository;
+    private final BorrowingBooksInformationService borrowingBooksInformationService;
 
 
-    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository) {
+    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository, BorrowingBooksInformationService borrowingBooksInformationService) {
         this.bookRepository = bookRepository;
         this.bookSearchRequestRepository = bookSearchRequestRepository;
+        this.borrowingBooksInformationService = borrowingBooksInformationService;
     }
 
     public Book addBook(Book book) {
         return bookRepository.save(book);
     }
+
+    public List<Book> findAllBooks() {
+        return bookRepository.findAll();
+    }
+
 
     public List<Book> findBooks(List<String> details) {
         List<Book> bookList = bookRepository.findAll();
@@ -125,10 +133,12 @@ public class BookService {
             throw new BookNotFoundException("Selected book wasn't borrowed");
         }
 
+
         Book book = bookInRepository.get();
+        borrowingBooksInformationService.returnBook(book);
         book.setReader(null);
         book.setBorrowDate(null);
-        book.setReturnDate(null);
+        book.setExpectedReturnDate(null);
 
         return book;
     }
@@ -143,6 +153,7 @@ public class BookService {
         }
 
         Book book = bookInRepository.get();
+        borrowingBooksInformationService.borrowBook(book, reader);
 
         if (book.getReader() != null) {
             throw new BorrowedBookException("Selected book is already borrowed");
@@ -151,7 +162,7 @@ public class BookService {
         LocalDate currentDate = LocalDate.now();
         LocalDate returnDate = currentDate.plusDays(7);
         book.setBorrowDate(currentDate);
-        book.setReturnDate(returnDate);
+        book.setExpectedReturnDate(returnDate);
         book.setReader(reader);
         bookRepository.save(book);
         return book;
@@ -194,38 +205,33 @@ public class BookService {
     }
 
     public Book showBookDetails(Long idBook, List<String> values) {
-        Optional<Book> bookOptional = bookRepository.findById(idBook);
+        return null;
+    }
 
-        if (bookOptional.isEmpty()) {
-            throw new BookNotFoundException("Selected book not found");
-        }
+    public List<String> booksStatus() {
+        List<String> bookList = new ArrayList<>();
 
-        Book book = new Book();
+        var countAllBooks = bookRepository.countAllBooks();
+        bookList.add(new String("Amount of books: " + countAllBooks));
 
-        for (String value : values) {
-            switch (value) {
-                case "title":
-                    book.setTitle(bookOptional.get().getTitle());
-                    break;
-                case "author":
-                    book.setAuthor(bookOptional.get().getAuthor());
-                    break;
-                case "genre":
-                    book.setGenre(bookOptional.get().getGenre());
-                    break;
-                case "publisher":
-                    book.setPublisher(bookOptional.get().getPublisher());
-                    break;
-                case "publicationDate":
-                    book.setPublicationDate(bookOptional.get().getPublicationDate());
-                    break;
-                case "ISBN":
-                    book.setISBN(bookOptional.get().getISBN());
-                    break;
-            }
-        }
+        var countBorrowedBooks = bookRepository.countBorrowedBooks();
+        bookList.add(new String("Amount of borrowed books: " + countBorrowedBooks));
 
-        return book;
+        var countBooksAvailableToBorrow = bookRepository.countBooksAvailableToBorrow();
+        bookList.add(new String("Amount of books which are available to borrow: " + countBooksAvailableToBorrow));
+
+
+        var countBooksAfterTheDueDate = borrowingBooksInformationService.countBooksAfterTheDueDate();
+        bookList.add(new String("Amount of books which are after the due date and returned: " + countBooksAfterTheDueDate));
+
+        var countBooksAfterDueDateNotReturned = borrowingBooksInformationService.countBooksAfterDueDateNotReturned();
+        bookList.add(new String("Amount of books which are after the due date and not returned: " + countBooksAfterDueDateNotReturned));
+
+        var countAllReadersAfterDueDate = borrowingBooksInformationService.countAllReadersAfterDueDate();
+        bookList.add(new String("Amount of readers after the due date: " + countAllReadersAfterDueDate));
+
+
+        return bookList;
 
     }
 }

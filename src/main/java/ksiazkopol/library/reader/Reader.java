@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Table(name = "readers")
@@ -26,4 +25,5 @@ public class Reader {
 
     @OneToMany(mappedBy = "reader", fetch = FetchType.EAGER)
     private Collection<Book> books;
+
 }
