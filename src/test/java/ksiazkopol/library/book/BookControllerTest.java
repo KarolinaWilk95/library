@@ -49,13 +49,13 @@ class BookControllerTest {
     void showBooks() {
         //given
         List<Book> listOfBooks = new ArrayList<>();
-        when(bookService.findBooks()).thenReturn(listOfBooks);
+        when(bookService.findAllBooks()).thenReturn(listOfBooks);
 
         //when
-        var result = bookController.findBooks();
+        var result = bookController.findAllBooks();
 
         //then
-        verify(bookService).findBooks();
+        verify(bookService).findAllBooks();
 
         assertThat(result).isEqualTo(listOfBooks);
 

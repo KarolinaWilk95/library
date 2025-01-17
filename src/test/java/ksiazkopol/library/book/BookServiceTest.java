@@ -1,6 +1,7 @@
 package ksiazkopol.library.book;
 
 import ksiazkopol.library.bookseries.BookSeries;
+import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationService;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -26,6 +27,8 @@ class BookServiceTest {
     BookRepository bookRepository;
     @Mock
     BookSearchRequestRepository bookSearchRequestRepository;
+    @Mock
+    RentalBooksInformationService booksInformationService;
 
     @InjectMocks
     BookService bookService;
@@ -61,7 +64,7 @@ class BookServiceTest {
         when(bookRepository.findAll()).thenReturn(bookList);
 
         //when
-        var result = bookService.findBooks();
+        var result = bookService.findAllBooks();
 
         //then
         verify(bookRepository).findAll();
@@ -264,7 +267,7 @@ class BookServiceTest {
 
         //then
         verify(bookRepository).findById(bookId);
-
+        verify(booksInformationService).returnBook(book);
         assertThat(result).isEqualTo(book);
 
 
@@ -304,7 +307,7 @@ class BookServiceTest {
 
         //then
         verify(bookRepository).findById(bookId);
-
+        verify(booksInformationService).borrowBook(book, reader);
         assertThat(result).isEqualTo(book);
 
     }

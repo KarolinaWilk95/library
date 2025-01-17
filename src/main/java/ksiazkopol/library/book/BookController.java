@@ -90,10 +90,4 @@ public class BookController {
         return new BookAPI(result);
 
     }
-
-    @GetMapping("/api/books/info")
-    public List<String> booksStatus() {
-        var result = bookService.booksStatus();
-        return result;
-    }
 }

@@ -57,7 +57,7 @@ class BookControllerIntegrationTest {
         List<Book> list = new ArrayList<>();
 
         //when
-        var findBooks = restTemplate.exchange("/api/books", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+        var findBooks = restTemplate.exchange("/api/allBooks", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
         });
         list = bookRepository.findAll();
 

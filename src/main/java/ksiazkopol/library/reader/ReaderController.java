@@ -3,6 +3,7 @@ package ksiazkopol.library.reader;
 import ksiazkopol.library.book.Book;
 import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookService;
+import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,12 @@ public class ReaderController {
 
     final private ReaderService readerService;
     final private BookService bookService;
+    final private RentalBooksInformationService rentalBooksInformationService;
 
-    public ReaderController(ReaderService readerService, BookService bookService) {
+    public ReaderController(ReaderService readerService, BookService bookService, RentalBooksInformationService rentalBooksInformationService) {
         this.readerService = readerService;
         this.bookService = bookService;
+        this.rentalBooksInformationService = rentalBooksInformationService;
     }
 
     @PostMapping("/api/readers")
@@ -92,6 +95,13 @@ public class ReaderController {
     public ResponseEntity<BookAPI> returnBook(@PathVariable Long id,
                                               @PathVariable Long readerId) {
         readerService.returnBook(id, readerId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/api/readers/{readerId}/books/{bookId}/renew")
+    public ResponseEntity<Void> renewBook(@PathVariable Long bookId,
+                                          @PathVariable Long readerId) {
+        rentalBooksInformationService.renewBook(bookId, readerId);
         return ResponseEntity.ok().build();
     }
 }

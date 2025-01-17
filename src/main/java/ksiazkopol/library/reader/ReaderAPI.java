@@ -1,6 +1,7 @@
 package ksiazkopol.library.reader;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import ksiazkopol.library.book.BookAPI;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class ReaderAPI {
     private Long id;
     private String name;
