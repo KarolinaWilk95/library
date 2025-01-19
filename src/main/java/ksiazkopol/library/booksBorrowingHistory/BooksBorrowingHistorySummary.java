@@ -1,16 +1,15 @@
-package ksiazkopol.library.rentalBooksInformation;
+package ksiazkopol.library.booksBorrowingHistory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RentalBooksInfoAPI {
+public class BooksBorrowingHistorySummary {
 
     private long amountOfBooks;
     private long amountOfBorrowedBooks;

@@ -1,4 +1,4 @@
-package ksiazkopol.library.rentalBooksInformation;
+package ksiazkopol.library.booksBorrowingHistory;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,26 +16,26 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class RentalBooksInformationControllerTest {
+class BooksBorrowingHistoryControllerTest {
 
     @Mock
-    RentalBooksInformationService rentalBooksInformationService;
+    BooksBorrowingHistoryService booksBorrowingHistoryService;
 
     @InjectMocks
-    RentalBooksInformationController rentalBooksInformationController;
+    BooksBorrowingHistoryController booksBorrowingHistoryController;
 
     @Test
     void showAllRecords() {
         //given
         List<RentalBooksInformation> rentalBooksInformationList = new ArrayList<>();
 
-        when(rentalBooksInformationService.showAllRecords()).thenReturn(rentalBooksInformationList);
+        when(booksBorrowingHistoryService.showAllRecords()).thenReturn(rentalBooksInformationList);
 
         //when
-        var result = rentalBooksInformationController.showAllRecords();
+        var result = booksBorrowingHistoryController.showAllRecords();
 
         //then
-        verify(rentalBooksInformationService).showAllRecords();
+        verify(booksBorrowingHistoryService).showAllRecords();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(result.getBody()).isEqualTo(rentalBooksInformationList);
     }

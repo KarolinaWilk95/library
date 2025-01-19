@@ -1,4 +1,4 @@
-package ksiazkopol.library.rentalBooksInformation;
+package ksiazkopol.library.booksBorrowingHistory;
 
 import ksiazkopol.library.book.Book;
 import org.junit.jupiter.api.Test;
@@ -17,26 +17,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RentalBooksInformationServiceTest {
+class BooksBorrowingHistoryServiceTest {
 
     @Mock
-    RentalBooksInformationRepository rentalBooksInformationRepository;
+    BooksBorrowingHistoryRepository booksBorrowingHistoryRepository;
 
     @InjectMocks
-    RentalBooksInformationService rentalBooksInformationService;
+    BooksBorrowingHistoryService booksBorrowingHistoryService;
 
     @Test
     void showAllRecords() {
         //given
         List<RentalBooksInformation> rentalBooksInformationList = new ArrayList<>();
 
-        when(rentalBooksInformationRepository.findAll()).thenReturn(rentalBooksInformationList);
+        when(booksBorrowingHistoryRepository.findAll()).thenReturn(rentalBooksInformationList);
 
         //when
-        var result = rentalBooksInformationService.showAllRecords();
+        var result = booksBorrowingHistoryService.showAllRecords();
 
         //then
-        verify(rentalBooksInformationRepository).findAll();
+        verify(booksBorrowingHistoryRepository).findAll();
         assertThat(result).isEqualTo(rentalBooksInformationList);
     }
 
@@ -56,13 +56,13 @@ class RentalBooksInformationServiceTest {
         booksInformation.setIdBook(id);
         booksInformation.setISBN(ISBN);
 
-        when(rentalBooksInformationRepository.findByIdBookAndIsbn(book.getId(),book.getISBN())).thenReturn(Optional.of(booksInformation));
+        when(booksBorrowingHistoryRepository.findByIdBookAndIsbn(book.getId(),book.getISBN())).thenReturn(Optional.of(booksInformation));
 
         //when
-        rentalBooksInformationService.returnBook(book);
+        booksBorrowingHistoryService.returnBook(book);
 
         //then
-        verify(rentalBooksInformationRepository).findByIdBookAndIsbn(id,ISBN);
+        verify(booksBorrowingHistoryRepository).findByIdBookAndIsbn(id,ISBN);
     }
 
     @Test
@@ -77,13 +77,13 @@ class RentalBooksInformationServiceTest {
         booksInformation.setIdBook(id);
         booksInformation.setISBN(ISBN);
 
-        when(rentalBooksInformationRepository.findByIdBookAndIsbn(book.getId(),book.getISBN())).thenReturn(Optional.empty());
+        when(booksBorrowingHistoryRepository.findByIdBookAndIsbn(book.getId(),book.getISBN())).thenReturn(Optional.empty());
 
         //when
-        rentalBooksInformationService.returnBook(book);
+        booksBorrowingHistoryService.returnBook(book);
 
         //then
-        verify(rentalBooksInformationRepository).findByIdBookAndIsbn(id,ISBN);
+        verify(booksBorrowingHistoryRepository).findByIdBookAndIsbn(id,ISBN);
     }
 
 
@@ -97,12 +97,12 @@ class RentalBooksInformationServiceTest {
         booksInformation.setIdBook(idBook);
         booksInformation.setExpectedReturnDate(LocalDate.now());
 
-        when(rentalBooksInformationRepository.findByReaderIdBookIdNotReturn(idBook,idReader)).thenReturn(Optional.of(booksInformation));
+        when(booksBorrowingHistoryRepository.findByReaderIdBookIdNotReturn(idBook,idReader)).thenReturn(Optional.of(booksInformation));
 
         //when
-        rentalBooksInformationService.renewBook(idBook,idReader);
+        booksBorrowingHistoryService.renewBook(idBook,idReader);
 
         //then
-        verify(rentalBooksInformationRepository).findByReaderIdBookIdNotReturn(idBook,idReader);
+        verify(booksBorrowingHistoryRepository).findByReaderIdBookIdNotReturn(idBook,idReader);
     }
 }

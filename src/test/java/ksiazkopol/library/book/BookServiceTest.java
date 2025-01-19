@@ -1,7 +1,7 @@
 package ksiazkopol.library.book;
 
 import ksiazkopol.library.bookseries.BookSeries;
-import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationService;
+import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryService;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -28,7 +28,7 @@ class BookServiceTest {
     @Mock
     BookSearchRequestRepository bookSearchRequestRepository;
     @Mock
-    RentalBooksInformationService booksInformationService;
+    BooksBorrowingHistoryService booksInformationService;
 
     @InjectMocks
     BookService bookService;

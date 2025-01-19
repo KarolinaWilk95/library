@@ -27,7 +27,7 @@ CREATE TABLE books(
     expected_return_date DATE
 );
 
-CREATE TABLE rental_books_information(
+CREATE TABLE books_borrowing_history(
     id BIGSERIAL PRIMARY KEY,
     id_book BIGINT,
     book_title VARCHAR(255),

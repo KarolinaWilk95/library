@@ -2,8 +2,6 @@ package ksiazkopol.library.reader;
 
 import ksiazkopol.library.book.Book;
 import ksiazkopol.library.book.BookAPI;
-import ksiazkopol.library.book.BookService;
-import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationService;
 import ksiazkopol.library.dao.ReaderSearchRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +15,9 @@ import java.util.stream.Collectors;
 public class ReaderController {
 
     final private ReaderService readerService;
-    final private BookService bookService;
-    final private RentalBooksInformationService rentalBooksInformationService;
 
-    public ReaderController(ReaderService readerService, BookService bookService, RentalBooksInformationService rentalBooksInformationService) {
+    public ReaderController(ReaderService readerService) {
         this.readerService = readerService;
-        this.bookService = bookService;
-        this.rentalBooksInformationService = rentalBooksInformationService;
     }
 
     @PostMapping("/api/readers")
@@ -76,7 +70,7 @@ public class ReaderController {
 
     @GetMapping("/api/readers/{id}/borrowed-books")
     public List<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
-        Collection<Book> result = readerService.findAllBorrowedBooks(id);
+        List<Book> result = readerService.findAllBorrowedBooks(id);
         return result.stream()
                 .map(BookAPI::new)
                 .collect(Collectors.toList());
@@ -101,8 +95,9 @@ public class ReaderController {
     @PutMapping("/api/readers/{readerId}/books/{bookId}/renew")
     public ResponseEntity<Void> renewBook(@PathVariable Long bookId,
                                           @PathVariable Long readerId) {
-        rentalBooksInformationService.renewBook(bookId, readerId);
+        readerService.renewBook(bookId, readerId);
         return ResponseEntity.ok().build();
     }
 }
+
 

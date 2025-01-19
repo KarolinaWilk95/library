@@ -1,11 +1,10 @@
 package ksiazkopol.library.book;
 
+import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryService;
 import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
-import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +19,13 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookSearchRequestRepository bookSearchRequestRepository;
-    private final RentalBooksInformationService rentalBooksInformationService;
+    private final BooksBorrowingHistoryService booksBorrowingHistoryService;
 
 
-    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository, RentalBooksInformationService rentalBooksInformationService) {
+    public BookService(BookRepository bookRepository, BookSearchRequestRepository bookSearchRequestRepository, BooksBorrowingHistoryService booksBorrowingHistoryService) {
         this.bookRepository = bookRepository;
         this.bookSearchRequestRepository = bookSearchRequestRepository;
-        this.rentalBooksInformationService = rentalBooksInformationService;
+        this.booksBorrowingHistoryService = booksBorrowingHistoryService;
     }
 
     public Book addBook(Book book) {
@@ -136,7 +135,7 @@ public class BookService {
 
 
         Book book = bookInRepository.get();
-        rentalBooksInformationService.returnBook(book);
+        booksBorrowingHistoryService.returnBook(book);
         book.setReader(null);
         book.setBorrowDate(null);
         book.setExpectedReturnDate(null);
@@ -159,7 +158,7 @@ public class BookService {
             throw new BorrowedBookException("Selected book is already borrowed");
         }
 
-        rentalBooksInformationService.borrowBook(book, reader);
+        booksBorrowingHistoryService.borrowBook(book, reader);
         LocalDate currentDate = LocalDate.now();
         LocalDate returnDate = currentDate.plusDays(7);
         book.setBorrowDate(currentDate);
@@ -236,17 +235,14 @@ public class BookService {
         return book;
     }
 
+    public void findBookByIDToRenew(Long bookId) {
+        Optional<Book> bookOptional = bookRepository.findById(bookId);
 
-    public long countAllBooks() {
-        return bookRepository.countAllBooks();
+        if (bookOptional.isEmpty()) {
+            throw new BookNotFoundException("Selected book not found");
+        }
+
+        bookOptional.get().setExpectedReturnDate(bookOptional.get().getExpectedReturnDate().plusDays(7));
+        bookRepository.save(bookOptional.get());
     }
-
-    public long countBorrowedBooks() {
-        return bookRepository.countBorrowedBooks();
-    }
-
-    public long countBooksAvailableToBorrow() {
-        return bookRepository.countBooksAvailableToBorrow();
-    }
-
 }

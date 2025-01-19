@@ -1,4 +1,4 @@
-package ksiazkopol.library.rentalBooksInformation;
+package ksiazkopol.library.booksBorrowingHistory;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "rental_books_information")
+@Table(name = "books_borrowing_history")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RentalBooksInformation {
+public class BooksBorrowingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column

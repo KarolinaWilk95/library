@@ -1,9 +1,8 @@
 package ksiazkopol.library.integrationTest;
 
 
-import ksiazkopol.library.book.Book;
-import ksiazkopol.library.rentalBooksInformation.RentalBooksInformation;
-import ksiazkopol.library.rentalBooksInformation.RentalBooksInformationRepository;
+import ksiazkopol.library.booksBorrowingHistory.RentalBooksInformation;
+import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +32,17 @@ public class RentalBooksInformationIntegrationTest {
     @Autowired
     TestRestTemplate restTemplate;
     @Autowired
-    RentalBooksInformationRepository rentalBooksInformationRepository;
+    BooksBorrowingHistoryRepository booksBorrowingHistoryRepository;
 
     @BeforeEach
     void setUp() {
-        rentalBooksInformationRepository.deleteAll();
+        booksBorrowingHistoryRepository.deleteAll();
 
         List<RentalBooksInformation> rentalBooksInformationList = List.of(
                 new RentalBooksInformation(null, 20L, "The Shining", "Stephen King", 9780385513251L, 4L, "Anna", "Kowalska", LocalDate.parse("2025-01-17"), LocalDate.parse("2025-01-24"), LocalDate.parse("2025-01-17"), (short) 0),
                 new RentalBooksInformation(null, 20L, "The Shining", "Stephen King", 9780385513251L, 1L, "Karolina", "Wilk", LocalDate.parse("2025-01-17"), LocalDate.parse("2025-01-31"), LocalDate.parse("2025-01-17"), (short) 1));
 
-        rentalBooksInformationRepository.saveAll(rentalBooksInformationList);
+        booksBorrowingHistoryRepository.saveAll(rentalBooksInformationList);
     }
 
     @Test
@@ -55,7 +54,7 @@ public class RentalBooksInformationIntegrationTest {
         var result = restTemplate.exchange("/api/rental", HttpMethod.GET, null, new ParameterizedTypeReference<List<RentalBooksInformation>>() {
         });
 
-        list = rentalBooksInformationRepository.findAll();
+        list = booksBorrowingHistoryRepository.findAll();
 
         //then
         assertThat(result.getBody()).hasSize(2);
