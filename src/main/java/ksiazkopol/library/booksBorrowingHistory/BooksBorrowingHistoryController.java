@@ -1,6 +1,7 @@
 package ksiazkopol.library.booksBorrowingHistory;
 
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,13 +19,15 @@ public class BooksBorrowingHistoryController {
     }
 
     @GetMapping("/api/status")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public List<BooksBorrowingHistoryAPI> showAllRecords() {
         Collection<BooksBorrowingHistory> rentalBooksInformationList = booksBorrowingHistoryService.showAllRecords();
 
         return BooksBorrowingHistoryAPI.toApi(rentalBooksInformationList);
     }
 
-    @GetMapping("/api/books/info")
+    @GetMapping("/api/status/summary")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public BooksBorrowingHistorySummaryAPI booksStatus() {
         BooksBorrowingHistorySummaryAPI borrowingHistorySummaryAPI = new BooksBorrowingHistorySummaryAPI(booksBorrowingHistoryService.bookStatus());
 

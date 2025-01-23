@@ -2,6 +2,7 @@ package ksiazkopol.library.book;
 
 import ksiazkopol.library.dao.BookSearchRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class BookController {
     }
 
     @PostMapping("api/books")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public BookAPI addBook(@RequestBody BookAPI book) {
         Book result = bookService.addBook(book.toModel());
         return new BookAPI(result);
@@ -32,7 +34,7 @@ public class BookController {
         return BookAPI.toApi(result);
     }
 
-    @GetMapping("api/allBooks")
+    @GetMapping("api/books/all")
     public List<BookAPI> findAllBooks() {
         List<Book> result = bookService.findAllBooks();
         return BookAPI.toApi(result);
@@ -46,12 +48,14 @@ public class BookController {
     }
 
     @DeleteMapping("/api/books/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<BookAPI> deleteByID(@PathVariable Long id) {
         bookService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/api/books/{id}")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<BookAPI> updateByID(@PathVariable Long id, @RequestBody
     Book book) {
         bookService.updateByID(id, book);
@@ -59,6 +63,7 @@ public class BookController {
     }
 
     @GetMapping("/api/books/search")
+    @PreAuthorize("hasAnyRole('READER','LIBRARIAN')")
     public List<BookAPI> search(@RequestParam(name = "author", required = false) String author,
                                 @RequestParam(name = "title", required = false) String title,
                                 @RequestParam(name = "genre", required = false) String genre,
@@ -83,6 +88,7 @@ public class BookController {
 
     //http://localhost:8080/api/books/1/showBookDetails?author&title&genre
     @GetMapping("/api/books/{id}/showBookDetails")
+    @PreAuthorize("hasAnyRole('READER','LIBRARIAN')")
     public BookAPI showBookDetails(@PathVariable Long id,
                                    @RequestParam List<String> values) {
 
