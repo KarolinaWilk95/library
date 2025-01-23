@@ -232,6 +232,7 @@ public class BookService {
                     break;
             }
         }
+        book.setId(bookOptional.get().getId());
         return book;
     }
 

@@ -13,8 +13,8 @@ public class BooksBorrowingHistoryController {
     private final BooksBorrowingHistoryService booksBorrowingHistoryService;
 
 
-    public BooksBorrowingHistoryController(BooksBorrowingHistoryService auditService) {
-        this.booksBorrowingHistoryService = auditService;
+    public BooksBorrowingHistoryController(BooksBorrowingHistoryService booksBorrowingHistoryService) {
+        this.booksBorrowingHistoryService = booksBorrowingHistoryService;
     }
 
     @GetMapping("/api/status")

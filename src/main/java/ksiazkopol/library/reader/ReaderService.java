@@ -109,11 +109,12 @@ public class ReaderService {
     }
 
 
-    public List<Book> findAllBorrowedBooks(Long id) {
-        Optional<Reader> readerInRepository = readerRepository.findById(id);
+    public List<Book> findAllBorrowedBooks(Long idReader) {
+        Optional<Reader> readerInRepository = readerRepository.findById(idReader);
+
 
         if (readerInRepository.isPresent()) {
-            return bookService.findAllBooksForReader(id);
+            return bookService.findAllBooksForReader(idReader);
         } else {
             throw new ReaderNotFoundException("Selected reader not found");
         }

@@ -1,7 +1,7 @@
 package ksiazkopol.library.book;
 
-import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryService;
+import ksiazkopol.library.bookseries.BookSeries;
 import ksiazkopol.library.dao.BookSearchRequest;
 import ksiazkopol.library.dao.BookSearchRequestRepository;
 import ksiazkopol.library.reader.Reader;
@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -470,5 +471,64 @@ class BookServiceTest {
         //then
         verify(bookRepository).findById(idBook);
         assertThat(result).hasMessage("Selected book was never assigned to book series");
+    }
+
+    @Test
+    void showBookDetails() {
+        //given
+        Long idBook = 1L;
+        List<String> details = new ArrayList<>();
+        details.add("title");
+        details.add("ISBN");
+
+        Book bookFromRepo = new Book();
+        bookFromRepo.setId(idBook);
+        bookFromRepo.setTitle("It");
+        bookFromRepo.setISBN(9780385504206L);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(bookFromRepo));
+
+        //when
+        var result = bookService.showBookDetails(idBook, details);
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result).isEqualTo(bookFromRepo);
+    }
+
+    @Test
+    void findBookByIDToRenew() {
+        //given
+        Long idBook = 1L;
+        Book book = new Book();
+        book.setId(idBook);
+        LocalDate date = LocalDate.now();
+        book.setExpectedReturnDate(date);
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.of(book));
+
+        //when
+        bookService.findBookByIDToRenew(idBook);
+
+        //then
+        verify(bookRepository).findById(idBook);
+        verify(bookRepository).save(book);
+        assertThat(book.getExpectedReturnDate()).isEqualTo(date.plusDays(7));
+    }
+
+    @Test
+    void findBookByIDToRenewIfBookNotExist() {
+        //given
+        Long idBook = 1L;
+
+        when(bookRepository.findById(idBook)).thenReturn(Optional.empty());
+
+        //when
+        var result = assertThrows(BookNotFoundException.class, () -> bookService.findBookByIDToRenew(idBook));
+
+        //then
+        verify(bookRepository).findById(idBook);
+        assertThat(result.getMessage()).isEqualTo("Selected book not found");
+
     }
 }

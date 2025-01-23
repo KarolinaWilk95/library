@@ -19,14 +19,11 @@ public interface BookRepository extends JpaRepository<Book, Long>, PagingAndSort
     @Query("select count(b) from Book b")
     long countAllBooks();
 
-    @Query("select count(b) from Book b where b.reader is not null and b.borrowDate is not null")
+    @Query("select count(b) from Book b where b.borrowDate is not null and b.reader is not null")
     long countBorrowedBooks();
 
-    @Query("select count(b) from Book b where b.reader is null and b.borrowDate is null")
+    @Query("select count(b) from Book b where b.reader is null and b.borrowDate is null and b.expectedReturnDate is null")
     long countBooksAvailableToBorrow();
-
-    @Query("select count(b) from Book b where b.expectedReturnDate - b.borrowDate > 7")
-    long countBooksAfterTheDueDate();
 
 
 }

@@ -69,8 +69,8 @@ public class ReaderController {
     }
 
     @GetMapping("/api/readers/{id}/borrowed-books")
-    public List<BookAPI> findAllBorrowedBooks(@PathVariable Long id) {
-        List<Book> result = readerService.findAllBorrowedBooks(id);
+    public List<BookAPI> findAllBorrowedBooks(@PathVariable Long idReader) {
+        List<Book> result = readerService.findAllBorrowedBooks(idReader);
         return result.stream()
                 .map(BookAPI::new)
                 .collect(Collectors.toList());

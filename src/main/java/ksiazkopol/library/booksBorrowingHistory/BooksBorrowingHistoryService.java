@@ -84,10 +84,15 @@ public class BooksBorrowingHistoryService {
     public BooksBorrowingHistorySummary bookStatus() {
         BooksBorrowingHistorySummary booksBorrowingHistorySummary = new BooksBorrowingHistorySummary();
         booksBorrowingHistorySummary.setAmountOfBooks(booksStatusService.countAllBooks());
+
         booksBorrowingHistorySummary.setAmountOfBorrowedBooks(booksStatusService.countBorrowedBooks());
+
         booksBorrowingHistorySummary.setAmountOfAvailableBooks(booksStatusService.countBooksAvailableToBorrow());
-        booksBorrowingHistorySummary.setBooksAfterDueDateReturned(booksBorrowingHistoryStatusService.countAllReadersAfterDueDate());
+
+        booksBorrowingHistorySummary.setBooksAfterDueDateReturned(booksBorrowingHistoryStatusService.countBooksAfterTheDueDate());
+
         booksBorrowingHistorySummary.setBooksAfterDueDateNotReturned(booksBorrowingHistoryStatusService.countBooksAfterDueDateNotReturned());
+
         booksBorrowingHistorySummary.setReadersAfterDueDate(booksBorrowingHistoryStatusService.countAllReadersAfterDueDate());
 
         return booksBorrowingHistorySummary;

@@ -239,11 +239,12 @@ class ReaderControllerIntegrationTest {
     @Test
     void returnBookIfReaderAndBookExist() {
         //given
-        Reader reader = readerRepository.findAll().getFirst();
-        Book book = bookRepository.findAll().getFirst();
+        Reader reader = readerRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(0);
 
         book.setReader(reader);
         book.setBorrowDate(LocalDate.now());
+        book.setExpectedReturnDate(LocalDate.now().plusDays(7));
         bookRepository.save(book);
 
         //when

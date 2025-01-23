@@ -209,4 +209,21 @@ class BookControllerTest {
 
     }
 
+    @Test
+    void showBookDetails() {
+        //given
+        Long idBook = 1L;
+        List<String> details = new ArrayList<>();
+        Book book = new Book();
+        book.setId(idBook);
+
+        when(bookService.showBookDetails(idBook,details)).thenReturn(book);
+
+        //when
+        var result = bookController.showBookDetails(idBook,details);
+
+        //then
+        verify(bookService).showBookDetails(idBook,details);
+        assertThat(result).isEqualTo(new BookAPI(book));
+    }
 }

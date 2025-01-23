@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +26,32 @@ class BooksBorrowingHistoryControllerTest {
     @Test
     void showAllRecords() {
         //given
-        List<RentalBooksInformation> rentalBooksInformationList = new ArrayList<>();
+        List<BooksBorrowingHistory> booksBorrowingHistories = new ArrayList<>();
 
-        when(booksBorrowingHistoryService.showAllRecords()).thenReturn(rentalBooksInformationList);
+        when(booksBorrowingHistoryService.showAllRecords()).thenReturn(booksBorrowingHistories);
 
         //when
         var result = booksBorrowingHistoryController.showAllRecords();
 
         //then
         verify(booksBorrowingHistoryService).showAllRecords();
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isEqualTo(rentalBooksInformationList);
+        assertThat(result).hasSize(0);
+        assertThat(result).isEqualTo(booksBorrowingHistories);
+    }
+
+    @Test
+    void showStatusTable() {
+        //given
+        BooksBorrowingHistorySummary borrowingHistory = new BooksBorrowingHistorySummary();
+
+        when(booksBorrowingHistoryService.bookStatus()).thenReturn(borrowingHistory);
+
+        //when
+        BooksBorrowingHistorySummaryAPI borrowingHistorySummaryAPI = new BooksBorrowingHistorySummaryAPI(borrowingHistory);
+        var result = booksBorrowingHistoryController.booksStatus();
+
+        //then
+        verify(booksBorrowingHistoryService).bookStatus();
+        assertThat(result).isEqualTo(borrowingHistorySummaryAPI);
     }
 }

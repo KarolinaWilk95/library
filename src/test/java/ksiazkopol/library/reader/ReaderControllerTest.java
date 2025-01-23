@@ -1,5 +1,8 @@
 package ksiazkopol.library.reader;
 
+import ksiazkopol.library.book.Book;
+import ksiazkopol.library.book.BookAPI;
+import ksiazkopol.library.dao.ReaderSearchRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +23,8 @@ class ReaderControllerTest {
 
     @Mock
     private ReaderService readerService;
+    @Mock
+    ReaderSearchRequest readerSearchRequest;
     @InjectMocks
     private ReaderController readerController;
 
@@ -69,7 +74,7 @@ class ReaderControllerTest {
     @Test
     void findByIDIfExist() {
         //given
-        Long id = 1L;
+        long id = 1L;
         Reader reader = new Reader();
         reader.setId(id);
 
@@ -89,7 +94,7 @@ class ReaderControllerTest {
     @Test
     void findByIDIfNotExist() {
         //given
-        Long id = 1L;
+        long id = 1L;
 
         doThrow(ReaderNotFoundException.class).when(readerService).getReaderByID(id);
 
@@ -104,7 +109,7 @@ class ReaderControllerTest {
     @Test
     void deleteByIDIfExist() {
         //given
-        Long id = 1L;
+        long id = 1L;
 
         doNothing().when(readerService).deleteByID(id);
 
@@ -122,7 +127,7 @@ class ReaderControllerTest {
     @Test
     void updateByID() {
         //given
-        Long id = 1L;
+        long id = 1L;
         Reader reader = new Reader();
         reader.setId(id);
         reader.setName("Karolina");
@@ -149,8 +154,8 @@ class ReaderControllerTest {
     @Test
     void borrowBook() {
         //given
-        Long bookId = 1L;
-        Long readerId = 1L;
+        long bookId = 1L;
+        long readerId = 1L;
 
         doNothing().when(readerService).borrowBook(bookId, readerId);
 
@@ -166,8 +171,8 @@ class ReaderControllerTest {
     @Test
     void returnBook() {
         //given
-        Long bookId = 1L;
-        Long readerId = 1L;
+        long bookId = 1L;
+        long readerId = 1L;
 
         doNothing().when(readerService).returnBook(bookId, readerId);
 
@@ -178,5 +183,68 @@ class ReaderControllerTest {
         verify(readerService).returnBook(bookId, readerId);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void findAllBorrowedBooks() {
+        //given
+        long idBook = 1L;
+        long idReader = 1L;
+        Book book = new Book();
+        book.setId(idBook);
+        List<Book> list = new ArrayList<>();
+        list.add(book);
+
+
+        when(readerService.findAllBorrowedBooks(idReader)).thenReturn(list);
+
+        //when
+        var result = readerController.findAllBorrowedBooks(idReader);
+
+        //then
+        verify(readerService).findAllBorrowedBooks(idReader);
+        assertThat(result).isEqualTo(list.stream().map(BookAPI::new).toList());
+    }
+
+    @Test
+    void renewBook() {
+        //given
+        long idReader = 1L;
+        long idBook = 1L;
+
+        doNothing().when(readerService).renewBook(idBook, idReader);
+
+        //when
+        readerController.renewBook(idBook, idReader);
+
+        //then
+        verify(readerService).renewBook(idBook, idReader);
+    }
+
+
+    @Test
+    void search() {
+        //given
+        ReaderSearchRequest request = new ReaderSearchRequest();
+        request.setName("Karolina");
+
+        Reader reader = new Reader();
+        reader.setId(1L);
+        reader.setName("Karolina");
+        reader.setSurname("Wilk");
+        reader.setBooks(new ArrayList<>());
+
+        List<Reader> list = new ArrayList<>();
+        list.add(reader);
+
+        when(readerService.search(request)).thenReturn(list);
+
+        //when
+        var result = readerController.search("Karolina", null);
+
+        //then
+        verify(readerService).search(request);
+        assertThat(result).isEqualTo(list.stream().map(ReaderAPI::new).toList());
+        assertThat(result).hasSize(1);
     }
 }

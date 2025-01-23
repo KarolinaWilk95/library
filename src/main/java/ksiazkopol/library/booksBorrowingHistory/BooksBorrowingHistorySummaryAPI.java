@@ -26,6 +26,7 @@ public class BooksBorrowingHistorySummaryAPI {
     public BooksBorrowingHistorySummaryAPI(BooksBorrowingHistorySummary booksBorrowingHistorySummary) {
         this.amountOfBooks = booksBorrowingHistorySummary.getAmountOfBooks();
         this.amountOfBorrowedBooks = booksBorrowingHistorySummary.getAmountOfBorrowedBooks();
+        this.amountOfAvailableBooks=booksBorrowingHistorySummary.getAmountOfAvailableBooks();
         this.booksAfterDueDateReturned = booksBorrowingHistorySummary.getBooksAfterDueDateReturned();
         this.booksAfterDueDateNotReturned = booksBorrowingHistorySummary.getBooksAfterDueDateNotReturned();
         this.readersAfterDueDate = booksBorrowingHistorySummary.getReadersAfterDueDate();
