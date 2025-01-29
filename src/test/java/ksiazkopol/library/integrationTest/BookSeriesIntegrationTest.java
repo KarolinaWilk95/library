@@ -81,12 +81,12 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void addBookSeries() {
+    void addBookSeriesValidRole() {
         //given
         BookSeries bookSeries = new BookSeries(null, "The Dark Tower", "Stephen King", null);
 
         //when
-        var result = restTemplate.exchange("/api/book-series", HttpMethod.POST, new HttpEntity<>(bookSeries), BookSeries.class);
+        var result = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/book-series", HttpMethod.POST, new HttpEntity<>(bookSeries), BookSeries.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -96,17 +96,44 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void findBookSeriesIfExist() {
+    void addBookSeriesInvalidRole() {
+        //given
+        BookSeries bookSeries = new BookSeries(null, "The Dark Tower", "Stephen King", null);
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/book-series", HttpMethod.POST, new HttpEntity<>(bookSeries), BookSeries.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void findBookSeriesIfExistValidRole() {
         //given
         Long id = bookSeriesRepository.findAll().get(0).getId();
 
         //when
-        var result = restTemplate.exchange("/api/book-series/" + id, HttpMethod.GET, null, BookSeries.class);
+        var resultAsLibrarian = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/book-series/" + id, HttpMethod.GET, null, BookSeries.class);
+        var resultAsReader = restTemplate.withBasicAuth("reader", "reader").exchange("/api/book-series/" + id, HttpMethod.GET, null, BookSeries.class);
 
         //then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody().getId()).isEqualTo(id);
+        assertThat(resultAsLibrarian.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultAsReader.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultAsLibrarian.getBody().getId()).isEqualTo(id);
+        assertThat(resultAsReader.getBody().getId()).isEqualTo(id);
 
+    }
+
+    @Test
+    void findBookSeriesIfExistInvalidRole() {
+        //given
+        Long id = bookSeriesRepository.findAll().get(0).getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("analyst", "1111").exchange("/api/book-series/" + id, HttpMethod.GET, null, BookSeries.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -114,7 +141,7 @@ public class BookSeriesIntegrationTest {
         //given
 
         //when
-        var result = restTemplate.exchange("/api/book-series/-1", HttpMethod.GET, null, String.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/-1", HttpMethod.GET, null, String.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -123,12 +150,12 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void deleteBookSeriesIfExist() {
+    void deleteBookSeriesIfExistValidRole() {
         //given
         Long id = bookSeriesRepository.findAll().get(0).getId();
 
         //when
-        var result = restTemplate.exchange("/api/book-series/" + id, HttpMethod.DELETE, null, BookSeries.class);
+        var result = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/book-series/" + id, HttpMethod.DELETE, null, BookSeries.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -137,11 +164,23 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
+    void deleteBookSeriesIfExistInvalidRole() {
+        //given
+        Long id = bookSeriesRepository.findAll().get(0).getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/book-series/" + id, HttpMethod.DELETE, null, BookSeries.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void deleteBookSeriesIfNotExist() {
         //given
 
         //when
-        var result = restTemplate.exchange("/api/book-series/-1", HttpMethod.DELETE, null, String.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/-1", HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -150,7 +189,7 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void updateById() {
+    void updateByIdValidRole() {
         //given
         Long id = bookSeriesRepository.findAll().get(0).getId();
         BookSeries updateBookSeries = new BookSeries();
@@ -158,13 +197,28 @@ public class BookSeriesIntegrationTest {
         updateBookSeries.setAuthor("Updated author of book series");
 
         //when
-        var result = restTemplate.exchange("/api/book-series/" + id, HttpMethod.PUT, new HttpEntity<>(updateBookSeries), BookSeries.class);
+        var result = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/book-series/" + id, HttpMethod.PUT, new HttpEntity<>(updateBookSeries), BookSeries.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(bookSeriesRepository.findById(id).get().getNameOfSeries()).isEqualTo("Updated name of series");
         assertThat(bookSeriesRepository.findById(id).get().getAuthor()).isEqualTo("Updated author of book series");
 
+    }
+
+    @Test
+    void updateByIdInvalidRole() {
+        //given
+        Long id = bookSeriesRepository.findAll().get(0).getId();
+        BookSeries updateBookSeries = new BookSeries();
+        updateBookSeries.setNameOfSeries("Updated name of series");
+        updateBookSeries.setAuthor("Updated author of book series");
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/book-series/" + id, HttpMethod.PUT, new HttpEntity<>(updateBookSeries), BookSeries.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -175,7 +229,7 @@ public class BookSeriesIntegrationTest {
         updateBookSeries.setAuthor("Updated author of book series");
 
         //when
-        var result = restTemplate.exchange("/api/book-series/-1", HttpMethod.PUT, new HttpEntity<>(updateBookSeries), String.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/-1", HttpMethod.PUT, new HttpEntity<>(updateBookSeries), String.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -184,13 +238,13 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void addBookToBookSeriesIfExist() {
+    void addBookToBookSeriesIfExistValidRole() {
         //given
         Long idBook = bookRepository.findAll().get(0).getId();
         Long idBookSeries = bookSeriesRepository.findAll().get(0).getId();
 
         //when
-        var result = restTemplate.exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.PUT, null, BookSeries.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.PUT, null, BookSeries.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -199,12 +253,27 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
+    void addBookToBookSeriesIfExistInvalidRole() {
+        //given
+        Long idBook = bookRepository.findAll().get(0).getId();
+        Long idBookSeries = bookSeriesRepository.findAll().get(0).getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.PUT, null, BookSeries.class);
+
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
     void addBookToBookSeriesIfNotExist() {
         //given
         Long idBook = bookRepository.findAll().get(0).getId();
 
         //when
-        var result = restTemplate.exchange("/api/book-series/-1/books/" + idBook, HttpMethod.PUT, null, String.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/-1/books/" + idBook, HttpMethod.PUT, null, String.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -212,7 +281,7 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
-    void deleteBookFromBookSeriesIfExist() {
+    void deleteBookFromBookSeriesIfExistValidRole() {
         //given
         BookSeries bookSeries = bookSeriesRepository.findAll().getFirst();
         Book book = bookRepository.findAll().getFirst();
@@ -225,7 +294,7 @@ public class BookSeriesIntegrationTest {
         bookRepository.save(book);
 
         //when
-        var result = restTemplate.exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.DELETE, null, BookSeries.class);
+        var result = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.DELETE, null, BookSeries.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -235,13 +304,28 @@ public class BookSeriesIntegrationTest {
     }
 
     @Test
+    void deleteBookFromBookSeriesIfExistInvalidRole() {
+        //given
+        BookSeries bookSeries = bookSeriesRepository.findAll().getFirst();
+        Book book = bookRepository.findAll().getFirst();
+        Long idBook = book.getId();
+        Long idBookSeries = bookSeries.getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("reader","reader").exchange("/api/book-series/" + idBookSeries + "/books/" + idBook, HttpMethod.DELETE, null, BookSeries.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void deleteBookFromBookSeriesIfNotExist() {
         //given
         Book book = bookRepository.findAll().getFirst();
         Long idBook = book.getId();
 
         //when
-        var result = restTemplate.exchange("/api/book-series/-1/books/" + idBook, HttpMethod.DELETE, null, String.class);
+        var result = restTemplate.withBasicAuth("admin", "admin").exchange("/api/book-series/-1/books/" + idBook, HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

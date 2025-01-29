@@ -53,14 +53,14 @@ public class ReaderController {
 
 
     @PutMapping("/api/readers/{id}")
-    @PreAuthorize("hasAnyRole('READER','LIBRARIAN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public ResponseEntity<ReaderAPI> updateByID(@PathVariable Long id, @RequestBody Reader reader) {
         readerService.updateByID(id, reader);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/readers/search")
-    @PreAuthorize("hasAnyRole('READER','LIBRARIAN')")
+    @PreAuthorize("hasRole('LIBRARIAN')")
     public List<ReaderAPI> search(@RequestParam(name = "name", required = false) String name,
                                   @RequestParam(name = "surname", required = false) String surname) {
         ReaderSearchRequest readerSearchRequest = new ReaderSearchRequest();

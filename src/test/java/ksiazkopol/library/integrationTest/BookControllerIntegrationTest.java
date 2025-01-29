@@ -1,6 +1,7 @@
 package ksiazkopol.library.integrationTest;
 
 import ksiazkopol.library.book.Book;
+import ksiazkopol.library.book.BookAPI;
 import ksiazkopol.library.book.BookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,10 +42,10 @@ class BookControllerIntegrationTest {
 
         bookRepository.deleteAll();
         List<Book> books = List.of(
-                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null),
-                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null,null),
-                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null,null),
-                new Book(null, "Harry Potter and the Sorcerers Stone", "J.K. Rowling", "Fantasy", "Bloomsbury Publishing", LocalDate.parse("1997-06-26"), 9780439023540L, null, null, null,null));
+                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null),
+                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null, null),
+                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null, null),
+                new Book(null, "Harry Potter and the Sorcerers Stone", "J.K. Rowling", "Fantasy", "Bloomsbury Publishing", LocalDate.parse("1997-06-26"), 9780439023540L, null, null, null, null));
         bookRepository.saveAll(books);
 
     }
@@ -55,9 +55,13 @@ class BookControllerIntegrationTest {
 
         //given
         List<Book> list = new ArrayList<>();
+        list.add(new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null));
+        list.add(new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null, null));
+        list.add(new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null, null));
+        list.add(new Book(null, "Harry Potter and the Sorcerers Stone", "J.K. Rowling", "Fantasy", "Bloomsbury Publishing", LocalDate.parse("1997-06-26"), 9780439023540L, null, null, null, null));
 
         //when
-        var findBooks = restTemplate.exchange("/api/allBooks", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+        var findBooks = restTemplate.exchange("/api/books/all", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
         });
         list = bookRepository.findAll();
 
@@ -71,12 +75,25 @@ class BookControllerIntegrationTest {
     }
 
     @Test
-    void addBook() {
+    void findAllBooksShowSelectedDetails() {
         //given
-        Book newBook = new Book(null, "The Hunger Games", "Suzanne Collins", "Dystopian", "Scholastic Press", LocalDate.parse("2008-09-14"), 9780345391803L, null, null, null,null);
 
         //when
-        ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books", HttpMethod.POST, new HttpEntity<>(newBook), Book.class);
+        var findBooks = restTemplate.exchange("/api/books?details=genre,title,author", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+        });
+
+        //then
+        assertThat(findBooks.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(findBooks.getBody().size()).isEqualTo(4);
+    }
+
+    @Test
+    void addBookValidRole() {
+        //given
+        Book newBook = new Book(null, "The Hunger Games", "Suzanne Collins", "Dystopian", "Scholastic Press", LocalDate.parse("2008-09-14"), 9780345391803L, null, null, null, null);
+
+        //when
+        ResponseEntity<Book> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/books", HttpMethod.POST, new HttpEntity<>(newBook), Book.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -91,13 +108,26 @@ class BookControllerIntegrationTest {
     }
 
     @Test
+    void addBookInvalidRole() {
+        //given
+        Book newBook = new Book(null, "The Hunger Games", "Suzanne Collins", "Dystopian", "Scholastic Press", LocalDate.parse("2008-09-14"), 9780345391803L, null, null, null, null);
+
+        //when
+        ResponseEntity<Book> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/books", HttpMethod.POST, new HttpEntity<>(newBook), Book.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
     void findBookByIdIfExist() {
         //given
 
         Long id = bookRepository.findAll().getFirst().getId();
 
         //when
-        ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books/" + id, HttpMethod.GET, null, Book.class);
+        ResponseEntity<Book> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/books/" + id, HttpMethod.GET, null, Book.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -110,7 +140,7 @@ class BookControllerIntegrationTest {
         //given
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.GET, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/books/-1", HttpMethod.GET, null, String.class);
 
         //then
         assertThat(responseEntity.getBody()).isEqualTo("Selected book not found");
@@ -119,12 +149,12 @@ class BookControllerIntegrationTest {
     }
 
     @Test
-    void deleteBookIfExist() {
+    void deleteBookIfExistValidRole() {
         //given
         Long id = bookRepository.findAll().get(0).getId();
 
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange("/api/books/" + id, HttpMethod.DELETE, null, Void.class);
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/books/" + id, HttpMethod.DELETE, null, Void.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -133,11 +163,24 @@ class BookControllerIntegrationTest {
     }
 
     @Test
+    void deleteBookIfExistInvalidRole() {
+        //given
+        Long id = bookRepository.findAll().get(0).getId();
+
+        //when
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/books/" + id, HttpMethod.DELETE, null, Void.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
     void deleteBookIfNotExist() {
         //given
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/books/-1", HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -146,13 +189,13 @@ class BookControllerIntegrationTest {
     }
 
     @Test
-    void updateBookIfExist() {
+    void updateBookIfExistValidRole() {
         //given
-        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null);
+        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null);
         Long id = bookRepository.findAll().get(0).getId();
 
         //when
-        ResponseEntity<Book> responseEntity = restTemplate.exchange("/api/books/" + id, HttpMethod.PUT, new HttpEntity<>(updatedBook), Book.class);
+        ResponseEntity<Book> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/books/" + id, HttpMethod.PUT, new HttpEntity<>(updatedBook), Book.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -160,12 +203,25 @@ class BookControllerIntegrationTest {
     }
 
     @Test
-    void updateBookIfNotExist() {
+    void updateBookIfExistInvalidRole() {
         //given
-        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null);
+        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null);
+        Long id = bookRepository.findAll().get(0).getId();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/books/-1", HttpMethod.PUT, new HttpEntity<>(updatedBook), String.class);
+        ResponseEntity<Book> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/books/" + id, HttpMethod.PUT, new HttpEntity<>(updatedBook), Book.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void updateBookIfNotExist() {
+        //given
+        Book updatedBook = new Book(null, "Władca pierścieni", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null);
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/books/-1", HttpMethod.PUT, new HttpEntity<>(updatedBook), String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -174,13 +230,14 @@ class BookControllerIntegrationTest {
     }
 
     @Test
-    void searchBookIfExist() {
+    void searchBookIfExistValidRole() {
         //given
 
 //        new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null),
 
         //when
-        var responseEntity = restTemplate.exchange("/api/books/search?author=Tolkien", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {});
+        var responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/books/search?author=Tolkien", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+        });
 
         //then
         var result = responseEntity.getBody();
@@ -194,4 +251,53 @@ class BookControllerIntegrationTest {
 
     }
 
+    @Test
+    void searchBookIfExistInvalidRole() {
+        //given
+
+//        new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null),
+
+        //when
+        var responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/books/search?author=Tolkien", HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {
+        });
+
+        //then
+        var result = responseEntity.getBody();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isNotNull();
+        assertThat(result.get(0).getTitle()).isEqualTo("The Lord of the Rings");
+        assertThat(result.get(0).getAuthor()).isEqualTo("J.R.R. Tolkien");
+        assertThat(result.get(0).getGenre()).isEqualTo("Fantasy");
+        assertThat(result.get(0).getISBN()).isEqualTo(9780345538922L);
+
+    }
+
+
+    @Test
+    void showBookDetailsValidRole() {
+        //given
+        Long bookId = bookRepository.findAll().getFirst().getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange
+                ("/api/books/" + bookId + "/showBookDetails?values=title,genre", HttpMethod.GET, null, BookAPI.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+    }
+
+    @Test
+    void showBookDetailsInvalidRole() {
+        //given
+        Long bookId = bookRepository.findAll().getFirst().getId();
+
+        //when
+        var result = restTemplate.withBasicAuth("analyst", "1111").exchange
+                ("/api/books/" + bookId + "/showBookDetails?values=title,genre", HttpMethod.GET, null, BookAPI.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
 }

@@ -531,4 +531,23 @@ class BookServiceTest {
         assertThat(result.getMessage()).isEqualTo("Selected book not found");
 
     }
+
+    @Test
+    void findAllBooksShowSelectedDetails() {
+        //given
+        Book book = new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null);
+        List<Book> bookList = new ArrayList<>();
+        bookList.add(book);
+        List<String> details = new ArrayList<>();
+        details.add("author");
+
+        when(bookRepository.findAll()).thenReturn(bookList);
+
+        //when
+        var result = bookService.findBooks(details);
+
+        //then
+        verify(bookRepository).findAll();
+        assertThat(result.get(0).getAuthor()).isEqualTo(book.getAuthor());
+    }
 }

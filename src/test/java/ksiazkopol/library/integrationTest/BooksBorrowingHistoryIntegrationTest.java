@@ -2,10 +2,7 @@ package ksiazkopol.library.integrationTest;
 
 
 import ksiazkopol.library.book.BookRepository;
-import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistory;
-import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryRepository;
-import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistorySummary;
-import ksiazkopol.library.reader.ReaderRepository;
+import ksiazkopol.library.booksBorrowingHistory.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,15 +50,12 @@ public class BooksBorrowingHistoryIntegrationTest {
     }
 
     @Test
-    void findAllRecords() {
+    void findAllRecordsValidRole() {
         //given
-        List<BooksBorrowingHistory> list = new ArrayList<>();
 
         //when
-        var result = restTemplate.exchange("/api/status", HttpMethod.GET, null, new ParameterizedTypeReference<List<BooksBorrowingHistory>>() {
+        var result = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/status", HttpMethod.GET, null, new ParameterizedTypeReference<List<BooksBorrowingHistoryAPI>>() {
         });
-
-        list = booksBorrowingHistoryRepository.findAll();
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -72,7 +65,18 @@ public class BooksBorrowingHistoryIntegrationTest {
     }
 
     @Test
-    void bookStatus() {
+    void findAllRecordsInvalidId() {
+        //given
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/status", HttpMethod.GET, null, Void.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void bookStatusValidRole() {
         //given
 
         var amountOfBooks = bookRepository.countAllBooks();
@@ -83,7 +87,8 @@ public class BooksBorrowingHistoryIntegrationTest {
         var amountOfReadersAfterDueDate = booksBorrowingHistoryRepository.countAllReadersAfterDueDate();
 
         //when
-        var result = restTemplate.exchange("/api/books/info", HttpMethod.GET, null, BooksBorrowingHistorySummary.class);
+        var result = restTemplate.withBasicAuth("analyst", "1111").exchange("/api/status/summary", HttpMethod.GET, null, BooksBorrowingHistorySummaryAPI.class);
+
 
         //then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -93,5 +98,16 @@ public class BooksBorrowingHistoryIntegrationTest {
         assertThat(result.getBody().getBooksAfterDueDateReturned()).isEqualTo(amountOfBooksAfterDueDate);
         assertThat(result.getBody().getBooksAfterDueDateNotReturned()).isEqualTo(amountOfBooksAfterDueDateNotReturned);
         assertThat(result.getBody().getReadersAfterDueDate()).isEqualTo(amountOfReadersAfterDueDate);
+    }
+
+    @Test
+    void bookStatusInvalidRole() {
+        //given
+
+        //when
+        var result = restTemplate.withBasicAuth("reader", "reader").exchange("/api/status/summary", HttpMethod.GET, null, BooksBorrowingHistorySummaryAPI.class);
+
+        //then
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

@@ -22,6 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,19 +60,19 @@ class ReaderControllerIntegrationTest {
 
 
         List<Book> books = List.of(
-                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null,null),
-                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null,null),
-                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null,null));
+                new Book(null, "The Lord of the Rings", "J.R.R. Tolkien", "Fantasy", "George Allen & Unwin", LocalDate.parse("1954-07-29"), 9780345538922L, null, null, null, null),
+                new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null, null),
+                new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null, null));
         bookRepository.saveAll(books);
     }
 
     @Test
-    void findAllReaders() {
+    void findAllReadersValidRole() {
         //given
         List<Reader> readers = new ArrayList<>();
 
         //when
-        var findReaders = restTemplate.exchange("/api/readers", HttpMethod.GET, null, new ParameterizedTypeReference<List<Reader>>() {
+        var findReaders = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers", HttpMethod.GET, null, new ParameterizedTypeReference<List<Reader>>() {
         });
         readers = readerRepository.findAll();
 
@@ -86,12 +87,24 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void addOneReader() {
+    void findAllReadersInvalidRole() {
+        //given
+
+        //when
+        var findReaders = restTemplate.withBasicAuth("reader", "reader").exchange("/api/readers", HttpMethod.GET, null, Void.class);
+
+        //then
+        assertThat(findReaders.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
+    void addOneReaderValidRole() {
         //given
         var newReader = new Reader(null, "Karolina", "Wójcik", null);
 
         //when
-        ResponseEntity<Reader> responseEntity = restTemplate.exchange("/api/readers", HttpMethod.POST, new HttpEntity<>(newReader), Reader.class);
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers", HttpMethod.POST, new HttpEntity<>(newReader), Reader.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -101,13 +114,26 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void findReaderByIdIfExist() {
+    void addOneReaderInvalidRole() {
+        //given
+        var newReader = new Reader(null, "Karolina", "Wójcik", null);
+
+        //when
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("analyst", "1111").exchange("/api/readers", HttpMethod.POST, new HttpEntity<>(newReader), Reader.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
+    void findReaderByIdIfExistValidRole() {
         //given
         Long id = readerRepository.findAll().get(0).getId();
 
 
         //when
-        ResponseEntity<Reader> responseEntity = restTemplate.exchange("/api/readers/" + id, HttpMethod.GET, null, Reader.class);
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers/" + id, HttpMethod.GET, null, Reader.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -118,11 +144,24 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
+    void findReaderByIdIfExistInvalidRole() {
+        //given
+        Long id = readerRepository.findAll().get(0).getId();
+
+        //when
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/readers/" + id, HttpMethod.GET, null, Reader.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
     void findReaderByIdIfNotExist() {
         //given
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/-1", HttpMethod.GET, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/-1", HttpMethod.GET, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -131,12 +170,12 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void deleteReaderByIdIfExist() {
+    void deleteReaderByIdIfExistValidRole() {
         //given
         Long id = readerRepository.findAll().get(0).getId();
 
         //when
-        ResponseEntity<Reader> responseEntity = restTemplate.exchange("/api/readers/" + id, HttpMethod.DELETE, null, Reader.class);
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers/" + id, HttpMethod.DELETE, null, Reader.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -145,11 +184,23 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
+    void deleteReaderByIdIfExistInvalidRole() {
+        //given
+        Long id = readerRepository.findAll().get(0).getId();
+
+        //when
+        ResponseEntity<Reader> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/readers/" + id, HttpMethod.DELETE, null, Reader.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void deleteReaderByIdIfNotExist() {
         //given
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/-1", HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/-1", HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -157,12 +208,12 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void searchReader() {
+    void searchReaderValidRole() {
         //given
         //new Reader(null, "Karolina", "Wilk", null),
 
         //when
-        var responseEntity = restTemplate.exchange("/api/readers/search?name=Karolina", HttpMethod.GET, null, new ParameterizedTypeReference<List<Reader>>() {
+        var responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers/search?name=Karolina", HttpMethod.GET, null, new ParameterizedTypeReference<List<Reader>>() {
         });
         var result = responseEntity.getBody();
 
@@ -176,13 +227,24 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void borrowBookIfReaderAndBookExist() {
+    void searchReaderInvalidRole() {
+        //given
+
+        //when
+        var responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/readers/search?name=Karolina", HttpMethod.GET, null, Void.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void borrowBookIfReaderAndBookExistValidRole() {
         //given
         Long idReader = readerRepository.findAll().getFirst().getId();
         Long idBook = bookRepository.findAll().getFirst().getId();
 
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange("/api/readers/" + idReader + "/books/" + idBook, HttpMethod.PUT, null, Void.class);
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("reader", "reader").exchange("/api/readers/" + idReader + "/books/" + idBook, HttpMethod.PUT, null, Void.class);
 
         //then
 
@@ -191,12 +253,25 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
+    void borrowBookIfReaderAndBookExistInvalidRole() {
+        //given
+        Long idReader = readerRepository.findAll().getFirst().getId();
+        Long idBook = bookRepository.findAll().getFirst().getId();
+
+        //when
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("analyst", "1111").exchange("/api/readers/" + idReader + "/books/" + idBook, HttpMethod.PUT, null, Void.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void borrowBookIfReaderExistBookNotExist() {
         //given
         Long idReader = readerRepository.findAll().getFirst().getId();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/" + idReader + "/books/-1", HttpMethod.PUT, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/" + idReader + "/books/-1", HttpMethod.PUT, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -215,7 +290,7 @@ class ReaderControllerIntegrationTest {
         bookRepository.save(book);
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.PUT, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.PUT, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -228,7 +303,7 @@ class ReaderControllerIntegrationTest {
         Long idBook = bookRepository.findAll().getFirst().getId();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/-1/books/" + idBook, HttpMethod.PUT, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/-1/books/" + idBook, HttpMethod.PUT, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -237,7 +312,7 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
-    void returnBookIfReaderAndBookExist() {
+    void returnBookIfReaderAndBookExistValidRole() {
         //given
         Reader reader = readerRepository.findAll().get(0);
         Book book = bookRepository.findAll().get(0);
@@ -247,8 +322,10 @@ class ReaderControllerIntegrationTest {
         book.setExpectedReturnDate(LocalDate.now().plusDays(7));
         bookRepository.save(book);
 
+//        readerRepository.save(reader);
+
         //when
-        ResponseEntity<Void> responseEntity = restTemplate.exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, Void.class);
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, Void.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -258,12 +335,27 @@ class ReaderControllerIntegrationTest {
     }
 
     @Test
+    void returnBookIfReaderAndBookExistInvalidRole() {
+        //given
+        Reader reader = readerRepository.findAll().get(0);
+        Book book = bookRepository.findAll().get(0);
+
+        //when
+        ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("analyst", "1111").exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, Void.class);
+
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+
+    @Test
     void returnBookIfReaderNotExist() {
         //given
         Book book = bookRepository.findAll().getFirst();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/-1/books/" + book.getId(), HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/-1/books/" + book.getId(), HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -276,7 +368,7 @@ class ReaderControllerIntegrationTest {
         Reader reader = readerRepository.findAll().getFirst();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/" + reader.getId() + "/books/-1", HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/" + reader.getId() + "/books/-1", HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -290,7 +382,7 @@ class ReaderControllerIntegrationTest {
         Book book = bookRepository.findAll().getFirst();
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.withBasicAuth("admin", "admin").exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

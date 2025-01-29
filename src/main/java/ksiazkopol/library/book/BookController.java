@@ -12,13 +12,10 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
-    private final BookRepository bookRepository;
 
 
-    public BookController(BookService bookService,
-                          BookRepository bookRepository) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
-        this.bookRepository = bookRepository;
     }
 
     @PostMapping("api/books")
@@ -86,7 +83,7 @@ public class BookController {
     }
 
 
-    //http://localhost:8080/api/books/1/showBookDetails?author&title&genre
+    //http://localhost:8080/api/books/1/showBookDetails?values=title,genre
     @GetMapping("/api/books/{id}/showBookDetails")
     @PreAuthorize("hasAnyRole('READER','LIBRARIAN')")
     public BookAPI showBookDetails(@PathVariable Long id,

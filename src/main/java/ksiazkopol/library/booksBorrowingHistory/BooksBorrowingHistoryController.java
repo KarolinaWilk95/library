@@ -19,18 +19,15 @@ public class BooksBorrowingHistoryController {
     }
 
     @GetMapping("/api/status")
-    @PreAuthorize("hasRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','ANALYST')")
     public List<BooksBorrowingHistoryAPI> showAllRecords() {
         Collection<BooksBorrowingHistory> rentalBooksInformationList = booksBorrowingHistoryService.showAllRecords();
-
         return BooksBorrowingHistoryAPI.toApi(rentalBooksInformationList);
     }
 
     @GetMapping("/api/status/summary")
-    @PreAuthorize("hasRole('LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('LIBRARIAN','ANALYST')")
     public BooksBorrowingHistorySummaryAPI booksStatus() {
-        BooksBorrowingHistorySummaryAPI borrowingHistorySummaryAPI = new BooksBorrowingHistorySummaryAPI(booksBorrowingHistoryService.bookStatus());
-
-        return borrowingHistorySummaryAPI;
+        return new BooksBorrowingHistorySummaryAPI(booksBorrowingHistoryService.bookStatus());
     }
 }
