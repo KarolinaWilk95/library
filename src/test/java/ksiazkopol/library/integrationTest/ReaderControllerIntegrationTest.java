@@ -3,6 +3,8 @@ package ksiazkopol.library.integrationTest;
 
 import ksiazkopol.library.book.Book;
 import ksiazkopol.library.book.BookRepository;
+import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistory;
+import ksiazkopol.library.booksBorrowingHistory.BooksBorrowingHistoryRepository;
 import ksiazkopol.library.reader.Reader;
 import ksiazkopol.library.reader.ReaderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +24,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,12 +43,15 @@ class ReaderControllerIntegrationTest {
     ReaderRepository readerRepository;
     @Autowired
     BookRepository bookRepository;
+    @Autowired
+    BooksBorrowingHistoryRepository booksBorrowingHistoryRepository;
 
 
     @BeforeEach
     void setUp() {
         bookRepository.deleteAll();
         readerRepository.deleteAll();
+        booksBorrowingHistoryRepository.deleteAll();
 
 
         List<Reader> readers = List.of(
@@ -64,6 +68,16 @@ class ReaderControllerIntegrationTest {
                 new Book(null, "The Shining", "Stephen King", "Horror", "Doubleday", LocalDate.parse("1977-01-01"), 9780385513251L, null, null, null, null),
                 new Book(null, "It", "Stephen King", "Horror", "Viking Press", LocalDate.parse("1986-01-01"), 9780385504206L, null, null, null, null));
         bookRepository.saveAll(books);
+
+        var bookFromRepo = books.getFirst();
+        var readerFromRepo = readers.getFirst();
+
+        List<BooksBorrowingHistory> booksBorrowingHistoryList = List.of(
+                new BooksBorrowingHistory(null, bookFromRepo.getId(),
+                        bookFromRepo.getTitle(), bookFromRepo.getAuthor(), bookFromRepo.getISBN(),
+                        readerFromRepo.getId(), readerFromRepo.getName(), readerFromRepo.getSurname(), bookFromRepo.getBorrowDate(), bookFromRepo.getBorrowDate(), null, (short) 0));
+
+        booksBorrowingHistoryRepository.saveAll(booksBorrowingHistoryList);
     }
 
     @Test
@@ -317,12 +331,13 @@ class ReaderControllerIntegrationTest {
         Reader reader = readerRepository.findAll().get(0);
         Book book = bookRepository.findAll().get(0);
 
+        reader.setBooks(List.of(book));
+        readerRepository.save(reader);
+
         book.setReader(reader);
         book.setBorrowDate(LocalDate.now());
         book.setExpectedReturnDate(LocalDate.now().plusDays(7));
         bookRepository.save(book);
-
-//        readerRepository.save(reader);
 
         //when
         ResponseEntity<Void> responseEntity = restTemplate.withBasicAuth("librarian", "1234").exchange("/api/readers/" + reader.getId() + "/books/" + book.getId(), HttpMethod.DELETE, null, Void.class);
